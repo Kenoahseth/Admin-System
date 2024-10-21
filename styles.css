@@ -10,7 +10,6 @@
 
 body {
   min-height: 100vh;
-  background: #f0f4ff;
 }
 
 .sidebar {
@@ -22,7 +21,7 @@ body {
   display: flex;
   overflow-x: hidden;
   flex-direction: column;
-  background: #062316;
+  background: #0f0b1a;
   padding: 25px 20px;
   transition: all 0.4s ease;
 }
@@ -347,4 +346,77 @@ body {
   align-items: end;
   color: #666;
   font-size: 14px;
+}
+
+/* Login */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.login-flex {
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  padding: 1rem;
+}
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  width: 350px;
+  height: 100%;
+  padding: 2rem;
+}
+
+.left-panel .input-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  margin: 2rem 0;
+}
+
+.left-panel .input-fields input[type="text"],
+.left-panel .input-fields input[type="password"] {
+  padding: 5px 10px;
+  width: 100%;
+  font-size: 16px;
+  border: 1px solid #bdbdbd;
+}
+
+.login-btn {
+  padding: 5px 0;
+  border: none;
+  background-color: #198754;
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  margin-bottom: 5px;
+}
+
+.login-btn:hover {
+  background-color: #136740;
+}
+
+.forgot-password {
+  text-decoration: none;
+  text-align: center;
+  color: #777;
+}
+
+.right-panel {
+  width: 450px;
+  overflow: hidden;
+  background-image: url(images/login-img.jpg);
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  border-radius: 20px;
 }
