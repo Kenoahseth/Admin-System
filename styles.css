@@ -155,7 +155,7 @@ body {
   width: 100%;
   height: 64px;
   background-color: #ddd;
-  padding: 0 1.8rem;
+  padding: 0 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -273,7 +273,7 @@ body {
 
 /* Event Section */
 .event-section {
-  padding: 1.6rem;
+  padding: 2rem;
   display: grid;
   grid-gap: 2rem;
   grid-template-columns: 2fr 1fr;
@@ -327,9 +327,14 @@ body {
   border-radius: 10px;
 }
 
-.activity-flex h1 {
+.activity-log-container h1 {
   text-align: center;
   padding: 1rem 0;
+}
+
+.activity-flex {
+  height: 400px;
+  overflow-y: scroll;
 }
 
 .activity-card {
@@ -429,4 +434,164 @@ body {
   background-size: contain;
   background-repeat: no-repeat;
   border-radius: 20px;
+}
+
+/* Employees List */
+.employees-list-section {
+  padding: 2rem;
+}
+
+.top-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.top-buttons .add-btn {
+  text-decoration: none;
+  background-color: #198754;
+  padding: 10px 15px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  transition: 0.3s ease-in-out;
+}
+
+.top-buttons .add-btn:hover {
+  background-color: #136740;
+}
+
+.top-buttons .edit-btn {
+  text-decoration: none;
+  border: 1px solid #333;
+  padding: 10px 15px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 700;
+  transition: 0.3s ease-in-out;
+}
+
+.top-buttons .edit-btn:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+.sort-select {
+  padding: 10px 15px;
+  font-size: 14px;
+  border: none;
+}
+
+.employees-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.employees-grid a {
+  text-decoration: none;
+  color: #333;
+}
+
+.employee-card {
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: 0.3s ease-in-out;
+  cursor: pointer;
+  height: 100%;
+}
+
+.employee-img {
+  width: 100%;
+}
+
+.employee-info {
+  padding: 1.4rem 1.6rem;
+}
+
+.employee-info .employee-name {
+  font-weight: 700;
+}
+
+.employee-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.employee-info .employee-position {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.employee-info .employee-status {
+  font-size: 14px;
+  color: #198754;
+  display: inline-block;
+  text-align: right;
+  flex: 1 0 auto;
+}
+
+.employee-info .employee-schedule {
+  font-size: 14px;
+}
+
+/* Personal Window */
+.employee-profile-section {
+  padding: 2rem;
+}
+
+.menu-buttons {
+  display: flex;
+}
+
+.menu-buttons button {
+  padding: 10px 15px;
+  border: none;
+  background-color: #eee;
+}
+
+.personal-info-window {
+  display: flex;
+  background-color: #eee;
+  padding: 2rem;
+  gap: 2rem;
+}
+
+.profile-card {
+  background-color: ;
+}
+
+.profile-card img {
+  width: 360px;
+}
+
+.profile-card .employee-name {
+  text-align: center;
+  font-weight: 700;
+}
+
+.profile-card .employee-role {
+  text-align: center;
+  color: #555;
+}
+
+.profile-info {
+  padding: 2rem;
+}
+
+.profile-info p {
+  color: #555;
+}
+
+.profile-info p span {
+  color: black;
+}
+
+.basic-info-field {
+  display: flex;
+  gap: 2rem;
 }

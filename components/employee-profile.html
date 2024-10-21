@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee Profile</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="../images/logo.png" alt="logo" />
+        <h2>Admin System</h2>
+      </div>
+      <ul class="sidebar-links">
+        <h4>
+          <span>Menu</span>
+          <div class="menu-separator"></div>
+        </h4>
+        <li>
+          <a href="index.html">
+            <span class="material-symbols-outlined"> dashboard </span
+            >Dashboard</a
+          >
+        </li>
+        <li>
+          <a href="../employees-list.html"
+            ><span class="material-symbols-outlined"> library_books </span
+            >Employees List</a
+          >
+        </li>
+        <li>
+          <a href="#"
+            ><span class="material-symbols-outlined"> folder_open </span
+            >Documents</a
+          >
+        </li>
+        <li>
+          <a href="#"
+            ><span class="material-symbols-outlined"> mail </span>Messages</a
+          >
+        </li>
+        <li>
+          <a href="#"
+            ><span class="material-symbols-outlined"> calendar_month </span
+            >Calendar</a
+          >
+        </li>
+      </ul>
+      <div class="user-account">
+        <div class="user-profile">
+          <img src="../images/profile.png" alt="Profile Image" />
+          <div class="user-detail">
+            <h3>Admin</h3>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main style="margin-left: 85px">
+      <div class="breadcrumbs">
+        <div class="left">
+          <p>Admin > <span>STAFFS AND EMPLOYEES</span></p>
+        </div>
+
+        <div class="right">
+          <a href="#">
+            <i class="fa fa-envelope" aria-hidden="true"></i>
+          </a>
+          <a href="#">
+            <i class="fa fa-user" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+
+      <section class="employee-profile-section">
+        <div class="profile-container">
+          <div class="menu-buttons">
+            <button>Personal</button>
+            <button>Attendance</button>
+            <button>Pay Roll</button>
+            <button>Documents</button>
+          </div>
+
+          <div class="personal-info-window">
+            <div class="profile-card">
+              <img src="../images/security.jpg" alt="" />
+              <p class="employee-name">JUAN JOSEPH TANGGOL</p>
+              <p class="employee-role">Security</p>
+              <div class="profile-info">
+                <p>Status: <span>Active</span></p>
+                <p>Email: <span>blahblah@gmail.com</span></p>
+                <p>Contact Number: <span>0912 876 1223</span></p>
+              </div>
+            </div>
+
+            <div class="basic-information">
+              <h1>Basic Information</h1>
+              <div class="basic-info-field">
+                <div>
+                  <p>First Name:</p>
+                  <p>Last Name:</p>
+                  <p>Sex:</p>
+                  <p>Age:</p>
+                  <p>Shift:</p>
+                </div>
+                <div>
+                  <p>Juan Joseph</p>
+                  <p>Tanggol</p>
+                  <p>Male</p>
+                  <p>28</p>
+                  <p>Night - 10:00PM - 5:00AM</p>
+                </div>
+              </div>
+
+              <h1>Personal Information</h1>
+              <div class="personal-information"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
