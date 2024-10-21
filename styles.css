@@ -363,14 +363,25 @@ body {
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
   border-radius: 20px;
   padding: 1rem;
+  height: 560px;
 }
 
 .left-panel {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   width: 350px;
   height: 100%;
   padding: 2rem;
+}
+
+.left-panel .logo {
+  margin-bottom: 2rem;
+  color: #198754;
+}
+
+.left-panel .welcome-msg {
+  color: #333;
 }
 
 .left-panel .input-fields {
@@ -389,13 +400,12 @@ body {
 }
 
 .login-btn {
-  padding: 5px 0;
+  padding: 5px 10px;
   border: none;
   background-color: #198754;
   color: #fff;
   font-weight: 700;
   font-size: 16px;
-  letter-spacing: 1px;
   cursor: pointer;
   transition: 0.3s ease-in-out;
   margin-bottom: 5px;
