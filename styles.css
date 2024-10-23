@@ -24,6 +24,7 @@ body {
   background: #0f0b1a;
   padding: 25px 20px;
   transition: all 0.4s ease;
+  z-index: 999;
 }
 
 .sidebar:hover {
@@ -299,6 +300,7 @@ body {
   margin-bottom: 1rem;
   transition: 0.3s ease-in-out;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .event-card:hover {
@@ -308,6 +310,7 @@ body {
 .event-card span {
   font-size: 1.6rem;
   flex: 0 1 auto;
+  color: black;
 }
 
 .event-card .event-name {
@@ -480,7 +483,7 @@ body {
 .sort-select {
   padding: 10px 15px;
   font-size: 14px;
-  border: none;
+  border: 1px solid #333;
 }
 
 .employees-grid {
@@ -533,6 +536,7 @@ body {
   display: inline-block;
   text-align: right;
   flex: 1 0 auto;
+  align-self: flex-start;
 }
 
 .employee-info .employee-schedule {
@@ -606,6 +610,12 @@ body {
 
 .profile-info p span {
   color: black;
+}
+
+.basic-information {
+  background-color: #fff;
+  padding: 2rem;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
 }
 
 .basic-info-field {
@@ -688,6 +698,7 @@ table.attendance-table tfoot .links a {
   background: none;
   border: none;
   font-size: 14px;
+  width: 100%;
 }
 
 .search-bar input[type="text"]:focus {
@@ -698,6 +709,11 @@ table.attendance-table tfoot .links a {
   padding: 10px 15px;
   background-color: #fff;
   border: 1px solid #333;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 /* Payroll Window */
@@ -706,13 +722,15 @@ table.attendance-table tfoot .links a {
   padding: 2rem;
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 2rem;
 }
 
 .payslip-table {
   background-color: #fff;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
-  width: 100%;
+  width: 50%;
+  height: 100%;
   padding: 2rem;
 }
 
@@ -720,7 +738,9 @@ table.attendance-table tfoot .links a {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   column-gap: 2rem;
+  row-gap: 0.3rem;
   margin: 0.6rem 0 2rem 0;
+  height: 100%;
 }
 
 .total-qty {
@@ -806,4 +826,122 @@ table.attendance-table tfoot .links a {
 
 .document-card .setting {
   flex: 0 0 auto;
+}
+
+/* Documents Section */
+.documents-section {
+  padding: 2rem;
+}
+
+.documents-container {
+  background-color: #eee;
+  padding: 2rem;
+}
+
+/* Messages Section */
+.messages-section {
+  padding: 2rem;
+}
+
+.messages-container {
+  padding: 2rem;
+  background-color: #eee;
+}
+
+.messages-search-bar {
+  width: 100%;
+}
+
+.messages-top-menu {
+  display: flex;
+  gap: 2rem;
+}
+
+.messages-cards {
+  padding: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.messages-card {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 10px 15px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.messages-card:hover {
+  outline: 1px solid black;
+}
+
+.message-name {
+  flex: 1 0 auto;
+  font-weight: 700;
+  width: 340px;
+}
+
+.message-text {
+  flex: 0 1 auto;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Calendar Section */
+.calendar-section {
+  padding: 2rem;
+}
+
+.calendar-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  width: 100%;
+}
+
+.events-list-container {
+  background-color: #eee;
+  padding: 2rem;
+  flex: 1 1 auto;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.05);
+}
+
+.events-list-container h1 {
+  margin-bottom: 1rem;
+}
+
+.events-list-container .event-cards {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.events-list-container .event-card {
+  background-color: #fff;
+}
+
+.calendar-event-name {
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  flex: 1 1 auto;
+}
+
+.calendar-event-date {
+  color: #555;
+  font-size: 12px;
+  text-align: right;
+}
+
+.calendar {
+  width: 720px;
+  height: 540px;
+  overflow-y: hidden;
 }
