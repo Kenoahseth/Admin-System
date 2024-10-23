@@ -319,6 +319,10 @@ body {
   text-overflow: ellipsis;
 }
 
+.event-card .event-date {
+  flex: 0 0 auto;
+}
+
 .event-card .event-date,
 .event-card .event-coordinator {
   color: #555;
