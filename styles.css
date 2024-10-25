@@ -800,6 +800,21 @@ table.attendance-table tfoot .links a {
   color: #fff;
 }
 
+.documents-menu .archive-btn {
+  text-decoration: none;
+  outline: 1px solid #c51e3a;
+  padding: 10px 20px;
+  color: #c51e3a;
+  font-size: 14px;
+  font-weight: 700;
+  transition: 0.3s ease-in-out;
+}
+
+.documents-menu .archive-btn:hover {
+  background-color: #c51e3a;
+  color: #fff;
+}
+
 .documents-menu .sort-select {
   padding: 10px 15px;
   font-size: 14px;
@@ -827,6 +842,56 @@ table.attendance-table tfoot .links a {
   justify-self: flex-start;
   flex: 1 1 auto;
 }
+/*  */
+.dropbtn {
+  background-color: #04aa6d;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  padding: 0 1rem;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  right: 0;
+}
+
+.dropdown-content button {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-content button:hover {
+  background-color: #ddd;
+}
+
+.dropdown:hover .dropdown-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown:hover .dropbtn {
+  background-color: #3e8e41;
+}
+/*  */
 
 .document-card .setting {
   flex: 0 0 auto;
@@ -948,4 +1013,140 @@ table.attendance-table tfoot .links a {
   width: 720px;
   height: 540px;
   overflow-y: hidden;
+}
+
+/* Add Employees */
+.add-employees-section {
+  padding: 2rem;
+}
+
+.add-employees-container {
+  display: flex;
+  overflow: hidden;
+  background-color: #eee;
+  padding: 0 2rem;
+  gap: 2rem;
+}
+
+.add-employee-picture {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.add-employee-picture button {
+  cursor: pointer;
+  margin: 1rem;
+  border: none;
+  background: none;
+}
+
+.add-employee-picture button p {
+  background-color: #198754;
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 10px 15px;
+  transition: 0.3s ease-in-out;
+}
+
+.add-employee-picture button:hover > p {
+  background-color: #136740;
+  border-radius: 20px;
+}
+
+.employee-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 1.6rem;
+  column-gap: 1rem;
+  padding: 2rem 0;
+}
+
+.employee-details input[type="text"],
+.employee-details input[type="number"],
+.employee-details input[type="date"],
+.employee-details input[type="time"],
+.employee-details select {
+  padding: 5px 10px;
+  font-size: 16px;
+  width: 100%;
+}
+
+.employee-details .grid-div {
+  width: 100%;
+}
+
+.shift-flex {
+  display: flex;
+  gap: 1rem;
+}
+
+.submit-btn {
+  grid-column: 3/4;
+  grid-row: 5/6;
+  justify-self: flex-end;
+  padding: 10px 15px;
+  width: 50%;
+  cursor: pointer;
+  background-color: #198754;
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  font-size: 16px;
+}
+
+/* Add Documents Section */
+.add-documents-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem;
+}
+
+.add-documents-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.add-documents-section .file-chooser-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.add-documents-section .file-chooser-btn img {
+  width: 250px;
+}
+
+.add-documents-section .file-chooser-btn .choose-btn-txt {
+  color: #333;
+  font-weight: 700;
+  transition: 0.3s ease-in-out;
+}
+
+.add-documents-section .upload-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.add-documents-section .upload-btn .file-name {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.add-documents-section .upload-btn .upload-btn-txt {
+  background-color: #198754;
+  padding: 10px 15px;
+  color: #fff;
+  font-weight: 700;
+  transition: 0.3s ease-in-out;
+  display: inline-block;
+}
+
+.add-documents-section .upload-btn:hover > .upload-btn-txt {
+  background-color: #136740;
 }

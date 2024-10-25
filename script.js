@@ -5,6 +5,18 @@ function showSection(sectionId) {
   document.getElementById(sectionId).style.display = "block";
 }
 
+function displayFileName() {
+  const fileInput = document.getElementById("fileInput");
+  const fileNameDisplay = document.getElementById("file-name");
+
+  if (fileInput.files.length > 0) {
+    // Update the file-name element with the chosen file's name
+    fileNameDisplay.textContent = fileInput.files[0].name;
+  } else {
+    fileNameDisplay.textContent = "No file chosen";
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   var calendarEl = document.getElementById("calendar");
   var calendar = new FullCalendar.Calendar(calendarEl, {
