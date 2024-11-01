@@ -1,14 +1,14 @@
 <?php 
 session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'admin') {
-    header("Location: login.html");
-    exit();
-}
+ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'admin') {
+    header("Location: login.php");
+   exit();
+}   
 
 include 'components/connector.php'; 
 
-$sql = "SELECT event_id, event_name, event_date, event_moderator FROM events_table";
-$result = $conn -> query($sql);
+//$sql = "SELECT event_id, event_name, event_date, event_moderator FROM events_table";
+//$result = $conn -> query($sql);
 
 ?>
 
