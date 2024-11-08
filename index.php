@@ -7,8 +7,8 @@ session_start();
 
 include 'components/connector.php'; 
 
-//$sql = "SELECT event_id, event_name, event_date, event_moderator FROM events_table";
-//$result = $conn -> query($sql);
+$sql = "SELECT event_id, event_name, event_date, event_organizer FROM events_table";
+$result = $conn -> query($sql);
 
 ?>
 

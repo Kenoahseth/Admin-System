@@ -621,17 +621,18 @@ body {
   background-color: #fff;
   padding: 2rem;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
+  /* min-width: 50rem; */
 }
 
 .basic-info-field {
   display: flex;
-  gap: 2rem;
+  gap: 10rem;
   margin-bottom: 2rem;
 }
 
 .personal-information-field {
   display: flex;
-  gap: 2rem;
+  gap: 6rem;
   margin-bottom: 2rem;
 }
 

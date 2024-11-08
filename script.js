@@ -15,3 +15,4 @@ function displayFileName() {
     fileNameDisplay.textContent = "No file chosen";
   }
 }
+

@@ -12,9 +12,16 @@
 </head>
 
 <body>
-    <?php include "components/sidebar.php"; ?>
+<?php 
+    include "components/sidebar.php"; /* linabas ko muna sa components folder kasi nagkakaproblema */
+    include "components/connector.php"; 
 
-    <main style="margin-left: 85px">
+
+    $sql = "SELECT staff_id, firstname, lastname, status, shift_start, shift_end FROM staffs_table";
+    $result = $conn->query($sql);
+    ?>
+
+   <main style="margin-left: 85px">
         <div class="breadcrumbs">
             <div class="left">
                 <p>Admin > <span>STAFFS AND EMPLOYEES</span></p>
@@ -43,37 +50,32 @@
             </div>
 
             <div class="employees-grid">
-                <a href="components/employee-profile.html">
-                    <div class="employee-card">
-                        <img src="images/room-service.png" alt="" class="employee-img" />
-                        <div class="employee-info">
-                            <div class="employee-flex">
-                                <p class="employee-name">Sarah DeLapaz</p>
-                                <span class="employee-status">Active</span>
-                            </div>
+                <?php
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                        $fullName = htmlspecialchars($row['firstname'] . ' ' . $row['lastname']);
+                        $statusColor = ($row['status'] === 'Active') ? 'green' : 'red';
 
-                            <p class="employee-position">Room Service Staff</p>
+                        echo '<a href="employee-profile2.php?id=' . $row['staff_id'] . '">
+                                <div class="employee-card">
+                                    <img src="images/default-profile.png" alt="Employee Image" class="employee-img" />
+                                    <div class="employee-info">
+                                        <div class="employee-flex">
+                                            <p class="employee-name">' . $fullName . '</p>
+                                            <span class="employee-status" style="color: ' . $statusColor . '">' . htmlspecialchars($row['status']) . '</span>
+                                        </div>
+                                        <p class="employee-position">Position Not Available</p> <!-- Placeholder if you don’t have a position column -->
+                                        <p class="employee-schedule">Shift: ' . htmlspecialchars($row['shift_start']).' - '.htmlspecialchars($row['shift_end']) . '</p>
+                                    </div>
+                                </div>
+                              </a>';
+                    }
+                } else {
+                    echo '<p>No employees found.</p>';
+                }
 
-                            <p class="employee-schedule">Mon-Fri 10:00PM-5:00AM</p>
-                        </div>
-                    </div>
-                </a>
-
-                <a href="components/employee-profile.html">
-                    <div class="employee-card">
-                        <img src="images/security.jpg" alt="" class="employee-img" />
-                        <div class="employee-info">
-                            <div class="employee-flex">
-                                <p class="employee-name">Pedro Rosario Matikas</p>
-                                <span class="employee-status" style="color: red">On Leave</span>
-                            </div>
-
-                            <p class="employee-position">Security</p>
-
-                            <p class="employee-schedule">Mon-Fri 10:00PM-5:00AM</p>
-                        </div>
-                    </div>
-                </a>
+                $conn->close();
+                ?>
             </div>
         </section>
     </main>

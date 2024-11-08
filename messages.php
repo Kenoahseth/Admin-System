@@ -1,3 +1,56 @@
+<?php
+require 'vendor/autoload.php';
+
+session_start();
+
+function getClient() {
+    $client = new Google_Client();
+    $client->setAuthConfig('C:/Users/Kenoah/Documents/GitHub/hris/Admin-System/credentials.json');
+    $client->setAccessType('offline');
+    $client->setRedirectUri('http://localhost:3000/messages.php'); // Update with your redirect URI
+    $client->addScope(Google_Service_Gmail::MAIL_GOOGLE_COM);
+
+    // Token file to store the token information
+    $tokenPath = 'token.json';
+
+    // If there’s an access token in session, set it
+    if (file_exists($tokenPath)) {
+        $accessToken = json_decode(file_get_contents($tokenPath), true);
+        $client->setAccessToken($accessToken);
+    }
+
+    // Check if the token is expired
+    if ($client->isAccessTokenExpired()) {
+        if ($client->getRefreshToken()) {
+            // Refresh the token if possible
+            $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+        } else {
+            // Redirect user to authorization URL if no valid token
+            if (!isset($_GET['code'])) {
+                $authUrl = $client->createAuthUrl();
+                echo "<a href='$authUrl'>Connect to Gmail</a>";
+                exit;
+            } else {
+                // Handle the authorization response by exchanging the code
+                $authCode = $_GET['code'];
+                $accessToken = $client->fetchAccessTokenWithAuthCode($authCode);
+                $client->setAccessToken($accessToken);
+
+                // Save the token to a file
+                if (!file_exists(dirname($tokenPath))) {
+                    mkdir(dirname($tokenPath), 0700, true);
+                }
+                file_put_contents($tokenPath, json_encode($client->getAccessToken()));
+            }
+        }
+    }
+    return $client;
+}
+
+$client = getClient();
+$service = new Google_Service_Gmail($client);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,7 +65,9 @@
 </head>
 
 <body>
-    <?php include "components/sidebar.php"; ?>
+    <?php include "components/sidebar.php";
+  
+    ?>
 
     <main style="margin-left: 85px">
         <div class="breadcrumbs">

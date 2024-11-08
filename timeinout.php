@@ -10,37 +10,40 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="../styles.css" />
 </head>
-
 <body>
-    <?php include "components/sidebar.php"; ?>
+    
+<Script>
+    function displayTime() {
+     const now = new Date();
+     const options = {
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: true
+  };
+  const formattedTime = now.toLocaleTimeString('en-US',   
+ options);
+  document.getElementById('currentTime').textContent = formattedTime;
+}
+setInterval(displayTime, 1000);
+displayTime(); 
+</Script>
 
-    <main style="margin-left: 85px">
-        <div class="breadcrumbs">
+<div class="breadcrumbs">
+    
             <div class="left">
-                <p>Admin > <span>STAFFS AND EMPLOYEES</span></p>
+                <p>Employee > <span>DASHBOARD</span></p>
             </div>
 
             <div class="right">
-                <a href="#">
-                    <i class="fa fa-envelope" aria-hidden="true"></i>
-                </a>
-                <a href="#">
-                    <i class="fa fa-user" aria-hidden="true"></i>
-                </a>
+            <div id="currentTime"></div>
             </div>
         </div>
+        
+     
 
         <section class="employee-profile-section">
-            <div class="profile-container">
-                <div class="menu-buttons">
-                    <button onclick="showSection('personal-info')">
-                        Personal Info
-                    </button>
-                    <button onclick="showSection('attendance')">Attendance</button>
-                    <button onclick="showSection('payslip')">Payroll</button>
-                    <button onclick="showSection('documents')">Documents</button>
-                </div>
-
+        
                 <div class="section" id="personal-info" style="display: block">
                     <div class="personal-info-window">
                         <div class="profile-card">
