@@ -56,7 +56,7 @@
                         $fullName = htmlspecialchars($row['firstname'] . ' ' . $row['lastname']);
                         $statusColor = ($row['status'] === 'Active') ? 'green' : 'red';
 
-                        echo '<a href="employee-profile2.php?id=' . $row['staff_id'] . '">
+                        echo '<a href="employee-profile.php?id=' . $row['staff_id'] . '">
                                 <div class="employee-card">
                                     <img src="images/default-profile.png" alt="Employee Image" class="employee-img" />
                                     <div class="employee-info">
