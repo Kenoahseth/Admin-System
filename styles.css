@@ -1057,6 +1057,7 @@ table.attendance-table tfoot .links a {
   border-radius: 20px;
 }
 
+
 .employee-details {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1160,38 +1161,14 @@ table.attendance-table tfoot .links a {
 
 /* calendar */
 /* pop up settings */
-.modal {
-    display: none; 
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgb(0, 0, 0);
-    background-color: rgba(0, 0, 0, 0.4); /* opacity */
-}
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 50%; 
-    border-radius: 8px;
-}
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
+
 .close:hover,
 .close:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
 }
+
 
 .add-event-btn{
   text-decoration: none;
@@ -1203,3 +1180,77 @@ table.attendance-table tfoot .links a {
   transition: 0.3s ease-in-out; 
   margin-top: 5px;  
   }
+
+  .add-event-btn:hover {
+    background-color: #136740;
+  }
+
+
+
+ .modal {
+  display: none; 
+  position: fixed;
+  z-index: 1; 
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;  
+  overflow: auto; 
+  background-color: rgba(0,0,0,0.4);
+ 
+}
+
+
+ .modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; 
+  padding: 20px;
+  border: 1px solid #888;
+  width:
+ 50%; 
+  border-radius: 5px; 
+  animation: fadeIn 0.5s ease; 
+}
+
+.modal-content .add-btn:hover {
+  background-color: #136740;
+}
+
+
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+  
+/* Documents page */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.document-card {
+  position: relative;
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

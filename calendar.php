@@ -27,7 +27,7 @@ if ($result->num_rows > 0) {
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
    
 </head>
-<body>
+<div>
 <?php include "components/sidebar.php"; ?>
 
 <main style="margin-left: 85px">
@@ -64,6 +64,7 @@ if ($result->num_rows > 0) {
 </main>
 
 <!-- Modal -->
+
 <div id="addEventModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -85,6 +86,7 @@ if ($result->num_rows > 0) {
         </form>
     </div>
 </div>
+                
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
