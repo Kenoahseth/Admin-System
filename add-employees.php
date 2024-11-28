@@ -15,10 +15,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $religion = $_POST['religion'];
     $educational_attainment = $_POST['educational_attainment'];
     $cnum = $_POST['cnum'];
+    $assigned_id = $_POST ['assigned_id'];
 
 
-    $sql = "INSERT INTO staffs_table (firstname, lastname, sex, age, shift_start, shift_end, bdate, civ_stat, nationality, address, religion, educational_attainment, cnum)
-            VALUES ('$firstname', '$lastname', '$sex', '$age', '$shift_start', '$shift_end', '$bdate', '$civ_stat', '$nationality', '$address', '$religion', '$educational_attainment', '$cnum' )";
+    $sql = "INSERT INTO staffs_table (firstname, lastname, sex, age, shift_start, shift_end, bdate, civ_stat, nationality, address, religion, educational_attainment, cnum , assigned_id)
+            VALUES ('$firstname', '$lastname', '$sex', '$age', '$shift_start', '$shift_end', '$bdate', '$civ_stat', '$nationality', '$address', '$religion', '$educational_attainment', '$cnum' ,'$assigned_id' )";
 
     if ($conn->query($sql) === TRUE) {
         echo "New employee added successfully";
@@ -140,6 +141,10 @@ $conn->close();
                         <div class="grid-div">
                             <label for="cnum">Contact Number</label>
                             <input type="number" name="cnum" placeholder="Enter their contact number" required />
+                        </div>
+                        <div class="grid-div">
+                            <label for="assigned_id">Employee ID</label>
+                            <input type="number" name="assigned_id" placeholder="Enter their assigned ID" required />
                         </div>
                         <button type="submit" class="submit-btn">Submit</button>
                     </div>

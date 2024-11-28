@@ -1254,3 +1254,25 @@ table.attendance-table tfoot .links a {
   justify-content: space-between;
   align-items: center;
 }
+
+
+/* employee portal */
+.emp-input{
+  font-size: 16px;
+  margin-left:12px ;
+  outline: none;
+  border: none;
+  background: transparent;
+}
+
+
+.emp-id{
+  display: flex;
+  margin-left: 55%;
+  padding: 12px;
+  border-radius: 28px;
+  background-color: rgb(255, 251, 251);
+}
+
+
+

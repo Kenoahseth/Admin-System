@@ -1,27 +1,28 @@
 <?php
 include 'components/connector.php';
 
-
-
 if (isset($_GET['id']) && !empty($_GET['id'])) {
-    $staff_id = intval($_GET['id']); 
+    $staff_id = intval($_GET['id']);
 
+ 
+    $staff_sql = "SELECT * FROM staffs_table WHERE staff_id = ?";
+    $staff_stmt = $conn->prepare($staff_sql);
+    $staff_stmt->bind_param("i", $staff_id);
+    $staff_stmt->execute();
+    $staff_result = $staff_stmt->get_result();
+    $staff = $staff_result->num_rows > 0 ? $staff_result->fetch_assoc() : null;
+    $staff_stmt->close();
 
-    $sql = "SELECT * FROM staffs_table WHERE staff_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $staff_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $staff = $result->fetch_assoc();
-    } else {
-        $staff = null; 
-    }
-
-    $stmt->close();
+    $salary_sql = "SELECT * FROM salary_table WHERE staff_id = ?";
+    $salary_stmt = $conn->prepare($salary_sql);
+    $salary_stmt->bind_param("i", $staff_id);
+    $salary_stmt->execute();
+    $salary_result = $salary_stmt->get_result();
+    $salary = $salary_result->num_rows > 0 ? $salary_result->fetch_assoc() : null;
+    $salary_stmt->close();
 } else {
-    $staff = null; 
+    $staff = null;
+    $salary = null;
 }
 
 $conn->close();
@@ -61,12 +62,9 @@ $conn->close();
         <section class="employee-profile-section">
             <div class="profile-container">
                 <div class="menu-buttons">
-                    <button onclick="showSection('personal-info')">
-                        Personal Info
-                    </button>
+                    <button onclick="showSection('personal-info')">Personal Info</button>
                     <button onclick="showSection('attendance')">Attendance</button>
                     <button onclick="showSection('payslip')">Payroll</button>
-                    <button onclick="showSection('documents')">Documents</button>
                 </div>
 
                 <div class="section" id="personal-info" style="display: block">
@@ -302,92 +300,82 @@ $conn->close();
                     </div>
                 </div>
 
+                
                 <div class="section" id="payslip" style="display: none">
-                    <div class="payslip-window">
-                        <div class="profile-card">
-                            <img src="../images/room-service.png" alt="" />
-                            <p class="employee-name">Sarah DeLapaz</p>
-                            <p class="employee-role">Room Service</p>
-                            <div class="profile-info">
-                                <p>Status: <span>Active</span></p>
-                                <p>Email: <span>blahblah@gmail.com</span></p>
-                                <p>Contact Number: <span>0912 876 1223</span></p>
-                            </div>
-                        </div>
-
-                        <div class="payslip-table">
-                            <h1>Payslip</h1>
-                            <div class="payslip-grid">
-                                <p>Basic</p>
-                                <span>15,000</span>
-                                <p>Incentives</p>
-                                <span>0.00</span>
-                                <p>Overtime</p>
-                                <span>2,017.00</span>
-                                <p class="total-qty">Total</p>
-                                <span class="total-qty">17,017.00</span>
-                            </div>
-
-                            <h3>Benefits</h3>
-                            <div class="payslip-grid">
-                                <p>SSS</p>
-                                <span>800.00</span>
-                                <p>PAGIBIG</p>
-                                <span>100.00</span>
-                                <p>PhilHealth</p>
-                                <span>412.50</span>
-                                <p class="total-qty">Total</p>
-                                <span class="total-qty" style="margin-bottom: 2rem">1,312.50</span>
-                                <div></div>
-                                <p>17,017.00</p>
-                                <div></div>
-                                <p>-1,312.00</p>
-                                <p class="total-qty">Grand Total</p>
-                                <span class="total-qty">15,704.50</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section" id="documents" style="display: none">
-                    <div class="documents-window">
-                        <div class="documents-menu">
-                            <a href="#" class="add-btn">Add</a>
-                            <a href="#" class="edit-btn">Edit</a>
-                            <select name="document-sort" id="" class="sort-select">
-                                <option value="" selected disabled>Sort Options</option>
-                                <option value="Date Added">Date Added</option>
-                                <option value="Alphabetical">Alphabetical</option>
-                            </select>
-                            <div class="search-bar">
-                                <input type="text" name="search-bar" id="search-bar"
-                                    placeholder="Search something..." />
-                                <span><i class="fa fa-search" aria-hidden="true"></i> </span>
-                            </div>
-                        </div>
-                        <div class="documents-list">
-                            <a href="#" class="document-card">
-                                <span class="material-symbols-outlined"> description </span>
-                                <p class="filename">Employee_TermsAndRegulations.pdf</p>
-                                <span class="material-symbols-outlined setting">
-                                    more_vert
-                                </span>
-                            </a>
-
-                            <a href="#" class="document-card">
-                                <span class="material-symbols-outlined"> description </span>
-                                <p class="filename">DeLapaz_ApplicationForm.pdf</p>
-                                <span class="material-symbols-outlined setting">
-                                    more_vert
-                                </span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <div class="payslip-window">
+        <div class="profile-card">
+            <img src="../images/default-profile.png" alt="" />
+            <p class="employee-name"><?php echo htmlspecialchars($staff['firstname'] . ' ' . $staff['lastname']); ?></p>
+            <p class="employee-role"><?php echo htmlspecialchars($staff['status']); ?></p>
+            <div class="profile-info">
+                <p>Status: <span><?php echo htmlspecialchars($staff['status']); ?></span></p>
+                <p>Email: <span><?php echo htmlspecialchars($staff['email']); ?></span></p>
+                <p>Contact Number: <span><?php echo htmlspecialchars($staff['cnum']); ?></span></p>
             </div>
-        </section>
-    </main>
-</body>
-<script src="../script.js"></script>
+        </div>
 
+        <div class="payslip-table">
+            <h1>Payslip</h1>
+            <div class="payslip-grid">
+
+    <p>Basic</p>
+    
+    <input type="text" name="basic" id="basic" value="<?php echo htmlspecialchars($salary['basic'] ?? ''); ?>" />
+
+    <p>Incentives</p>
+    <input type="text" name="incentives" id="incentives" value="<?php echo htmlspecialchars($salary['incentives'] ?? ''); ?>" />
+
+    <p>Overtime</p>
+    <input type="text" name="overtime" id="overtime" value="<?php echo htmlspecialchars($salary['overtime'] ?? ''); ?>" />
+
+    <p class="total-qty">Total</p>
+    <input type="text" name="total" id="total" value="<?php echo htmlspecialchars($salary['total'] ?? ''); ?>" readonly />
+    </div>
+    
+    <h3>Benefits</h3>
+    <div class="payslip-grid">
+    <p>SSS</p>
+    <input type="text" name="sss" id="sss" value="<?php echo htmlspecialchars($salary['sss'] ?? ''); ?>" />
+
+    <p>PAGIBIG</p>
+    <input type="text" name="pagibig" id="pagibig" value="<?php echo htmlspecialchars($salary['pagibig'] ?? ''); ?>" />
+
+    <p>PhilHealth</p>
+    <input type="text" name="philhealth" id="philhealth" value="<?php echo htmlspecialchars($salary['philhealth'] ?? ''); ?>" />
+
+    
+    <p class="total-qty">Grand Total</p>
+    <input type="text" name="grand_total" id="grand_total" value="<?php echo htmlspecialchars($staff['grand_total'] ?? ''); ?>" readonly />
+</div>
+        </div>
+    </div>
+</div>
+<script src="script.js">            
+</script>
+
+<script>
+    function updateTotals() {
+        // Get the values from input fields, defaulting to 0 if empty
+        const basic = parseFloat(document.getElementById('basic').value) || 0;
+        const incentives = parseFloat(document.getElementById('incentives').value) || 0;
+        const overtime = parseFloat(document.getElementById('overtime').value) || 0;
+
+        const sss = parseFloat(document.getElementById('sss').value) || 0;
+        const pagibig = parseFloat(document.getElementById('pagibig').value) || 0;
+        const philhealth = parseFloat(document.getElementById('philhealth').value) || 0;
+
+        // Calculate Total and Grand Total
+        const total = basic + incentives + overtime;
+        const grandTotal = total + sss + pagibig + philhealth;
+
+        // Update the Total and Grand Total fields
+        document.getElementById('total').value = total.toFixed(2);
+        document.getElementById('grand_total').value = grandTotal.toFixed(2);
+    }
+
+    // Add a single event listener for all relevant fields
+    document.querySelectorAll('#basic, #incentives, #overtime, #sss, #pagibig, #philhealth')
+        .forEach(input => input.addEventListener('input', updateTotals));
+</script>
+</body>
 </html>

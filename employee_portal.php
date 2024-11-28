@@ -10,99 +10,108 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="../styles.css" />
 </head>
-<body>
-    
-<Script>
-    function displayTime() {
-     const now = new Date();
-     const options = {
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-    hour12: true
-  };
-  const formattedTime = now.toLocaleTimeString('en-US',   
- options);
-  document.getElementById('currentTime').textContent = formattedTime;
-}
-setInterval(displayTime, 1000);
-displayTime(); 
-</Script>
 
-<div class="breadcrumbs">
-    
+<body>
+    <main>
+        <div class="breadcrumbs">
             <div class="left">
-                <p>Employee > <span>DASHBOARD</span></p>
+                <span>STAFFS AND EMPLOYEES</span>
             </div>
+        
+            <form class="emp-id">
+                <input class="emp-input" type="int" placeholder="Enter Employee ID" required>   
+                
+            </form>
+
+            
 
             <div class="right">
-            <div id="currentTime"></div>
+                <a href="#">
+                    <i class="fa fa-envelope" aria-hidden="true"></i>
+                </a>
+                <a href="#">
+                    <i class="fa fa-user" aria-hidden="true"></i>
+                </a>
             </div>
         </div>
-        
-     
 
         <section class="employee-profile-section">
-        
+            <div class="profile-container">
+                <div class="menu-buttons">
+                    <button onclick="showSection('personal-info')">
+                        Personal Info
+                    </button>
+                    <button onclick="showSection('attendance')">Attendance</button>
+                    <button onclick="showSection('payslip')">Payroll</button>
+                </div>
+
                 <div class="section" id="personal-info" style="display: block">
                     <div class="personal-info-window">
-                        <div class="profile-card">
-                            <img src="../images/room-service.png" alt="" />
-                            <p class="employee-name">Sarah DeLapaz</p>
-                            <p class="employee-role">Room Service</p>
-                            <div class="profile-info">
-                                <p>Status: <span>Active</span></p>
-                                <p>Email: <span>blahblah@gmail.com</span></p>
-                                <p>Contact Number: <span>0912 876 1223</span></p>
-                            </div>
-                        </div>
+                    <div class="profile-card">
+    <img src="../images/default-profile.png" alt="Profile Picture" />
+    <p class="employee-name">
+        <?php echo !empty($staff['firstname']) && !empty($staff['lastname']) ? 
+            $staff['firstname'] . ' ' . $staff['lastname'] : 'Employee name'; ?>
+    </p>
+    <p class="employee-role">
+        <?php echo !empty($staff['status']) ? $staff['status'] : 'Role'; ?>
+    </p>
+    <div class="profile-info">
+        <p>Status: <span><?php echo !empty($staff['status']) ? $staff['status'] : ''; ?></span></p>
+        <p>Email: <span><?php echo !empty($staff['email']) ? $staff['email'] : '  '; ?></span></p>
+        <p>Contact Number: <span><?php echo !empty($staff['cnum']) ? $staff['cnum'] : '  '; ?></span></p>
+    </div>
+</div>
+
 
                         <div class="basic-information">
-                            <h1>Basic Information</h1>
-                            <br />
-                            <div class="basic-info-field">
-                                <div>
-                                    <p>First Name:</p>
-                                    <p>Last Name:</p>
-                                    <p>Sex:</p>
-                                    <p>Age:</p>
-                                    <p>Shift:</p>
+                                <h1>Basic Information</h1>
+                                <br />
+                                <div class="basic-info-field">
+                                    <div>
+                                        <p>First Name:</p>
+                                        <p>Last Name:</p>
+                                        <p>Sex:</p>
+                                        <p>Age:</p>
+                                        <p>Shift:</p>
+                                    </div>
+                                    <div>
+                                        <p><?php echo htmlspecialchars($staff['firstname'] ?? ''); ?></p>
+                                        <p><?php echo htmlspecialchars($staff['lastname'] ?? ''); ?></p>
+                                        <p><?php echo htmlspecialchars($staff['sex'] ?? ''); ?></p>
+                                        <p><?php echo htmlspecialchars($staff['age'] ?? ''); ?></p>
+                                        <p><?php echo htmlspecialchars($staff['shift_start'] ?? '') .' - '. htmlspecialchars($staff['shift_end']?? ''); ?></p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p>Sarah</p>
-                                    <p>DeLapaz</p>
-                                    <p>Female</p>
-                                    <p>30</p>
-                                    <p>Night - 10:00PM - 5:00AM</p>
-                                </div>
-                            </div>
 
-                            <h1>Personal Information</h1>
-                            <br />
-                            <div class="personal-information-field">
-                                <div>
-                                    <p>Date of birth</p>
-                                    <p>Civil Status</p>
-                                    <p>Nationality</p>
-                                    <p>Address</p>
-                                    <p>Religion</p>
-                                    <p>Languages Known</p>
-                                    <p>Highest Qualification</p>
-                                    <p>School/University Name</p>
-                                    <p>Year Graduated</p>
-                                </div>
-                                <div>
-                                    <p>June 24, 1988</p>
-                                    <p>Single</p>
-                                    <p>Filipino</p>
-                                    <p>
-                                        123 Mabini Street, San Isidro, Quezon City, Metro Manila
-                                    </p>
-                                    <p>Roman Catholic</p>
-                                    <p>Filipino, English</p>
-                                    <p>College Graduate</p>
-                                    <p>Quezon City University</p>
-                                    <p>2023</p>
+                                <h1>Personal Information</h1>
+                                <br />
+                                <div class="personal-information-field">
+                                    <div>
+                                        <p>Date of birth:</p>
+                                        <p>Height:</p>
+                                        <p>Weight:</p>
+                                        <p>Civil Status:</p>
+                                        <p>Nationality:</p>
+                                        <p>Address:</p>
+                                        <p>Languages Known:</p>
+                                        <p>Educational Attainment:</p>
+                                        <p>Religion:</p>
+                                        <p>Contact Number:</p>
+
+
+                                    </div>
+                                    <div>
+                                        <p><?php echo htmlspecialchars($staff['bdate']?? ''); ?></p>
+                                        <p><?php echo htmlspecialchars($staff['height']?? ''); ?></p>
+                                        <p><?php echo htmlspecialchars($staff['weight']?? ''); ?></p>
+                                        <p><?php echo htmlspecialchars($staff['civ_stat']?? ''); ?></p>
+                                        <p><?php echo htmlspecialchars($staff['nationality']?? ''); ?></p>
+                                        <p><?php echo htmlspecialchars($staff['address']?? ''); ?></p>
+                                        <p><?php echo htmlspecialchars($staff['languages']?? ''); ?></p>
+                                        <p><?php echo htmlspecialchars($staff['educational_attainment']?? ''); ?></p>
+                                        <p><?php echo htmlspecialchars($staff['religion']?? ''); ?></p>
+                                        <p><?php echo htmlspecialchars($staff['cnum']?? ''); ?></p>
                                 </div>
                             </div>
                         </div>

@@ -74,3 +74,52 @@
 <script src=" https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js "></script>
 
 </html>
+
+<div class="payslip-table">
+            <h1>Payslip</h1>
+            <div class="payslip-grid">
+                <p>Basic</p>
+                <span><?php echo htmlspecialchars($salary['basic'] ?? '0.00'); ?></span>
+                <p>Incentives</p>
+                <span><?php echo htmlspecialchars($salary['incentives'] ?? '0.00'); ?></span>
+                <p>Overtime</p>
+                <span><?php echo htmlspecialchars($salary['overtime'] ?? '0.00'); ?></span>
+                <p class="total-qty">Total</p>
+                <span class="total-qty">
+                    <?php
+                    echo htmlspecialchars(
+                        number_format(
+                            ($salary['basic'] ?? 0) +
+                            ($salary['incentives'] ?? 0) +
+                            ($salary['overtime'] ?? 0),
+                            2
+                        )
+                    );
+                    ?>
+                </span>
+            </div>
+
+            <h3>Benefits</h3>
+            <div class="payslip-grid">
+                <p>SSS</p>
+                <span><?php echo htmlspecialchars($salary['sss'] ?? '0.00'); ?></span>
+                <p>PAGIBIG</p>
+                <span><?php echo htmlspecialchars($salary['pagibig'] ?? '0.00'); ?></span>
+                <p>PhilHealth</p>
+                <span><?php echo htmlspecialchars($salary['philhealth'] ?? '0.00'); ?></span>
+                <p class="total-qty">Total</p>
+                <span class="total-qty" style="margin-bottom: 2rem">
+                    <?php
+                    echo htmlspecialchars(
+                        number_format(
+                            ($salary['sss'] ?? 0) +
+                            ($salary['pagibig'] ?? 0) +
+                            ($salary['philhealth'] ?? 0),
+                            2
+                        )
+                    );
+                    ?>
+                </span>
+                <div></div>
+                <p><?php echo htmlspecialchars($salary['final_pay'] ?? '0.00'); ?></p>
+            </div>
