@@ -4,7 +4,8 @@ include 'components/connector.php';
 if (isset($_GET['id']) && !empty($_GET['id'])) {
     $staff_id = intval($_GET['id']);
 
- 
+    date_default_timezone_set('Asia/Manila');
+
     $staff_sql = "SELECT * FROM staffs_table WHERE staff_id = ?";
     $staff_stmt = $conn->prepare($staff_sql);
     $staff_stmt->bind_param("i", $staff_id);
@@ -20,6 +21,32 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     $salary_result = $salary_stmt->get_result();
     $salary = $salary_result->num_rows > 0 ? $salary_result->fetch_assoc() : null;
     $salary_stmt->close();
+
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fetch_attendance'])) {
+        $attendance_records = [];
+
+        $sql = "SELECT at.date, st.status, at.time_in, at.time_out, at.recorded_status,
+                    SEC_TO_TIME(TIMESTAMPDIFF(SECOND, at.time_in, at.time_out)) AS overtime,
+                    SEC_TO_TIME(TIMESTAMPDIFF(SECOND, st.shift_start, at.time_in)) AS undertime
+                FROM attendance_table at
+                JOIN staffs_table st ON at.assigned_id = st.assigned_id
+                WHERE at.assigned_id = ?
+                ORDER BY at.date DESC";
+        $stmt = $conn->prepare($sql);
+        if ($stmt) {
+            $stmt->bind_param("i", $staff_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            while ($row = $result->fetch_assoc()) {
+                $attendance_records[] = $row;
+            }
+            $stmt->close();
+        }
+        
+        echo json_encode($attendance_records);
+        exit;
+    }
 } else {
     $staff = null;
     $salary = null;
@@ -27,6 +54,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
 $conn->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -140,165 +168,44 @@ $conn->close();
                             <div class="attendance-header">
                                 <h1>Daily Time Records</h1>
                                 <div class="search-bar">
-                                    <input type="text" name="search-bar" id="search-bar"
-                                        placeholder="Search something..." />
-                                    <span><i class="fa fa-search" aria-hidden="true"></i>
-                                    </span>
+                                    <input type="text" name="search-bar" id="search-bar" placeholder="Search something..." />
+                                    <span><i class="fa fa-search" aria-hidden="true"></i></span>
                                 </div>
                             </div>
                             <table class="attendance-table">
                                 <thead>
                                     <tr>
                                         <th>DATE</th>
-                                        <th>STATUS</th>
-                                        <th>SCHEDULE</th>
+                                        <th>RECORDED STATUS</th><!-- from attendance_table -->
                                         <th>CLOCK IN</th>
                                         <th>CLOCK OUT</th>
-                                        <th>LATE</th>
-                                        <th>BREAK</th>
-                                        <th>UNDERTIME</th>
                                         <th>OVERTIME</th>
-                                        <th>ACTION</th>
+                                        <th>UNDERTIME</th>
                                     </tr>
                                 </thead>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="10">
-                                            <div class="links">
-                                                <a href="#">&laquo;</a>
-                                                <a class="active" href="#">1</a> <a href="#">2</a>
-                                                <a href="#">3</a> <a href="#">4</a>
-                                                <a href="#">&raquo;</a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tfoot>
                                 <tbody>
-                                    <tr>
-                                        <td>cell1_1</td>
-                                        <td>cell2_1</td>
-                                        <td>cell3_1</td>
-                                        <td>cell4_1</td>
-                                        <td>cell5_1</td>
-                                        <td>cell6_1</td>
-                                        <td>cell7_1</td>
-                                        <td>cell8_1</td>
-                                        <td>cell9_1</td>
-                                        <td>cell10_1</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_2</td>
-                                        <td>cell2_2</td>
-                                        <td>cell3_2</td>
-                                        <td>cell4_2</td>
-                                        <td>cell5_2</td>
-                                        <td>cell6_2</td>
-                                        <td>cell7_2</td>
-                                        <td>cell8_2</td>
-                                        <td>cell9_2</td>
-                                        <td>cell10_2</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_3</td>
-                                        <td>cell2_3</td>
-                                        <td>cell3_3</td>
-                                        <td>cell4_3</td>
-                                        <td>cell5_3</td>
-                                        <td>cell6_3</td>
-                                        <td>cell7_3</td>
-                                        <td>cell8_3</td>
-                                        <td>cell9_3</td>
-                                        <td>cell10_3</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_4</td>
-                                        <td>cell2_4</td>
-                                        <td>cell3_4</td>
-                                        <td>cell4_4</td>
-                                        <td>cell5_4</td>
-                                        <td>cell6_4</td>
-                                        <td>cell7_4</td>
-                                        <td>cell8_4</td>
-                                        <td>cell9_4</td>
-                                        <td>cell10_4</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_5</td>
-                                        <td>cell2_5</td>
-                                        <td>cell3_5</td>
-                                        <td>cell4_5</td>
-                                        <td>cell5_5</td>
-                                        <td>cell6_5</td>
-                                        <td>cell7_5</td>
-                                        <td>cell8_5</td>
-                                        <td>cell9_5</td>
-                                        <td>cell10_5</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_6</td>
-                                        <td>cell2_6</td>
-                                        <td>cell3_6</td>
-                                        <td>cell4_6</td>
-                                        <td>cell5_6</td>
-                                        <td>cell6_6</td>
-                                        <td>cell7_6</td>
-                                        <td>cell8_6</td>
-                                        <td>cell9_6</td>
-                                        <td>cell10_6</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_7</td>
-                                        <td>cell2_7</td>
-                                        <td>cell3_7</td>
-                                        <td>cell4_7</td>
-                                        <td>cell5_7</td>
-                                        <td>cell6_7</td>
-                                        <td>cell7_7</td>
-                                        <td>cell8_7</td>
-                                        <td>cell9_7</td>
-                                        <td>cell10_7</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_8</td>
-                                        <td>cell2_8</td>
-                                        <td>cell3_8</td>
-                                        <td>cell4_8</td>
-                                        <td>cell5_8</td>
-                                        <td>cell6_8</td>
-                                        <td>cell7_8</td>
-                                        <td>cell8_8</td>
-                                        <td>cell9_8</td>
-                                        <td>cell10_8</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_9</td>
-                                        <td>cell2_9</td>
-                                        <td>cell3_9</td>
-                                        <td>cell4_9</td>
-                                        <td>cell5_9</td>
-                                        <td>cell6_9</td>
-                                        <td>cell7_9</td>
-                                        <td>cell8_9</td>
-                                        <td>cell9_9</td>
-                                        <td>cell10_9</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_10</td>
-                                        <td>cell2_10</td>
-                                        <td>cell3_10</td>
-                                        <td>cell4_10</td>
-                                        <td>cell5_10</td>
-                                        <td>cell6_10</td>
-                                        <td>cell7_10</td>
-                                        <td>cell8_10</td>
-                                        <td>cell9_10</td>
-                                        <td>cell10_10</td>
-                                    </tr>
+                                    <?php if (!empty($attendance_records)) : ?>
+                                        <?php foreach ($attendance_records as $record) : ?>
+                                            <tr>
+                                                <td><?= htmlspecialchars($record['date']); ?></td>
+                                                <td><?= htmlspecialchars($record['recorded_status']); ?></td>
+                                                <td><?= htmlspecialchars($record['time_in'] ?? '-'); ?></td>
+                                                <td><?= htmlspecialchars($record['time_out'] ?? '-'); ?></td>
+                                                <td><?= htmlspecialchars($record['overtime'] ?? '-'); ?></td>
+                                                <td><?= htmlspecialchars($record['undertime'] ?? '-'); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else : ?>
+                                        <tr>
+                                            <td colspan="7">No attendance records found.</td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+                                     
 
                 
                 <div class="section" id="payslip" style="display: none">

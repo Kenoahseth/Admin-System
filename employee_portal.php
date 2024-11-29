@@ -1,119 +1,244 @@
+<?php
+date_default_timezone_set('Asia/Manila');
+
+
+include "components/connector.php"; 
+$staff = [];
+$attendance_records = [];
+
+
+if (isset($_GET['employee_id'])) {
+    $employee_id = intval($_GET['employee_id']);
+    
+    // Fetch staff details
+    $sql = "SELECT * FROM staffs_table WHERE assigned_id = ?";
+    $stmt = $conn->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param("i", $employee_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        if ($result->num_rows > 0) {
+            $staff = $result->fetch_assoc();
+        }
+        $stmt->close();
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $assigned_id = intval($_POST['assigned_id']);
+    $current_time = date('H:i:s');
+    $current_date = date('Y-m-d');
+
+    if (isset($_POST['time_in'])) {
+        // Insert or update Time In and set recorded_status to Active
+        $sql = "INSERT INTO attendance_table (assigned_id, time_in, date, recorded_status) 
+                VALUES (?, ?, ?, 'Active') 
+                ON DUPLICATE KEY UPDATE time_in = VALUES(time_in), recorded_status = 'Active'";
+        $stmt = $conn->prepare($sql);
+        if ($stmt) {
+            $stmt->bind_param("iss", $assigned_id, $current_time, $current_date);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        // Update status to Active in staffs_table
+        $update_status_sql = "UPDATE staffs_table SET status = 'Active' WHERE assigned_id = ?";
+        $stmt = $conn->prepare($update_status_sql);
+        if ($stmt) {
+            $stmt->bind_param("i", $assigned_id);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+
+    if (isset($_POST['time_out'])) {
+        // Update Time Out for the existing record
+        $sql = "UPDATE attendance_table SET time_out = ? WHERE assigned_id = ? AND date = ?";
+        $stmt = $conn->prepare($sql);
+        if ($stmt) {
+            $stmt->bind_param("sis", $current_time, $assigned_id, $current_date);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        // Update status to Inactive in staffs_table
+        $update_status_sql = "UPDATE staffs_table SET status = 'Inactive' WHERE assigned_id = ?";
+        $stmt = $conn->prepare($update_status_sql);
+        if ($stmt) {
+            $stmt->bind_param("i", $assigned_id);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+}
+
+
+
+// Handle API request for fetching attendance records
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fetch_attendance'])) {
+    $assigned_id = intval($_GET['assigned_id']);
+    $attendance_records = [];
+
+    // Fetch attendance records
+    $sql = "SELECT at.date, st.status, at.time_in, at.time_out, at.recorded_status,
+                SEC_TO_TIME(TIMESTAMPDIFF(SECOND, at.time_in, at.time_out)) AS overtime,
+                SEC_TO_TIME(TIMESTAMPDIFF(SECOND, st.shift_start, at.time_in)) AS undertime
+            FROM attendance_table at
+            JOIN staffs_table st ON at.assigned_id = st.assigned_id
+            WHERE at.assigned_id = ?
+            ORDER BY at.date DESC";
+    $stmt = $conn->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param("i", $assigned_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        while ($row = $result->fetch_assoc()) {
+            $attendance_records[] = $row;
+        }
+        $stmt->close();
+    }
+
+    // Return JSON response
+    echo json_encode($attendance_records);
+    exit;
+}
+
+$conn->close();
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Employee Profile</title>
+    <title>Employee Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="../styles.css" />
+    <script src="attendance.js"></script>
 </head>
 
 <body>
+    <script>
+       function displayTime() {
+    const now = new Date();
+    const options = {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        timeZone: 'Asia/Manila',
+        hour12: true
+    };
+    const formattedTime = now.toLocaleTimeString('en-US', options);
+    document.getElementById('currentTime').textContent = formattedTime;
+}
+setInterval(displayTime, 1000);
+displayTime();
+
+    </script>
     <main>
         <div class="breadcrumbs">
             <div class="left">
                 <span>STAFFS AND EMPLOYEES</span>
             </div>
-        
-            <form class="emp-id">
-                <input class="emp-input" type="int" placeholder="Enter Employee ID" required>   
-                
+
+            <!-- Employee ID Form -->
+            <form class="emp-id" method="GET" action="">
+                <input class="emp-input" type="number" name="employee_id" placeholder="Enter Employee ID" required>
+                <button type="submit"></button>
             </form>
 
-            
-
             <div class="right">
-                <a href="#">
-                    <i class="fa fa-envelope" aria-hidden="true"></i>
-                </a>
-                <a href="#">
-                    <i class="fa fa-user" aria-hidden="true"></i>
-                </a>
+                <div id="currentTime"></div>
             </div>
         </div>
 
         <section class="employee-profile-section">
             <div class="profile-container">
                 <div class="menu-buttons">
-                    <button onclick="showSection('personal-info')">
-                        Personal Info
-                    </button>
+                    <button onclick="showSection('personal-info')">Personal Info</button>
                     <button onclick="showSection('attendance')">Attendance</button>
                     <button onclick="showSection('payslip')">Payroll</button>
                 </div>
 
-                <div class="section" id="personal-info" style="display: block">
+                <div class="section" id="personal-info" style="display: block;">
                     <div class="personal-info-window">
-                    <div class="profile-card">
-    <img src="../images/default-profile.png" alt="Profile Picture" />
-    <p class="employee-name">
-        <?php echo !empty($staff['firstname']) && !empty($staff['lastname']) ? 
-            $staff['firstname'] . ' ' . $staff['lastname'] : 'Employee name'; ?>
-    </p>
-    <p class="employee-role">
-        <?php echo !empty($staff['status']) ? $staff['status'] : 'Role'; ?>
-    </p>
-    <div class="profile-info">
-        <p>Status: <span><?php echo !empty($staff['status']) ? $staff['status'] : ''; ?></span></p>
-        <p>Email: <span><?php echo !empty($staff['email']) ? $staff['email'] : '  '; ?></span></p>
-        <p>Contact Number: <span><?php echo !empty($staff['cnum']) ? $staff['cnum'] : '  '; ?></span></p>
-    </div>
-</div>
+                        <!-- Profile Card -->
+                        <div class="profile-card">
+                            <img src="../images/default-profile.png" alt="Profile Picture" />
+                            <p class="employee-name">
+                                <?= htmlspecialchars($staff['firstname'] ?? 'Employee name') . ' ' . htmlspecialchars($staff['lastname'] ?? ''); ?>
+                            </p>
+                            <p class="employee-role"><?= htmlspecialchars($staff['status'] ?? 'Role'); ?></p>
+                            <div class="profile-info">
+                                <p>Status: <span><?= htmlspecialchars($staff['status'] ?? ''); ?></span></p>
+                                <p>Email: <span><?= htmlspecialchars($staff['email'] ?? ''); ?></span></p>
+                                <p>Contact Number: <span><?= htmlspecialchars($staff['cnum'] ?? ''); ?></span></p>
+                            </div>
+                        </div>
 
-
+                        <!-- Basic Information -->
                         <div class="basic-information">
-                                <h1>Basic Information</h1>
-                                <br />
-                                <div class="basic-info-field">
-                                    <div>
-                                        <p>First Name:</p>
-                                        <p>Last Name:</p>
-                                        <p>Sex:</p>
-                                        <p>Age:</p>
-                                        <p>Shift:</p>
-                                    </div>
-                                    <div>
-                                        <p><?php echo htmlspecialchars($staff['firstname'] ?? ''); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['lastname'] ?? ''); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['sex'] ?? ''); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['age'] ?? ''); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['shift_start'] ?? '') .' - '. htmlspecialchars($staff['shift_end']?? ''); ?></p>
-                                    </div>
+                            <h1>Basic Information</h1>
+                            <div class="basic-info-field">
+                                <div>
+                                    <p>First Name:</p>
+                                    <p>Last Name:</p>
+                                    <p>Sex:</p>
+                                    <p>Age:</p>
+                                    <p>Shift:</p>
                                 </div>
-
-                                <h1>Personal Information</h1>
-                                <br />
-                                <div class="personal-information-field">
-                                    <div>
-                                        <p>Date of birth:</p>
-                                        <p>Height:</p>
-                                        <p>Weight:</p>
-                                        <p>Civil Status:</p>
-                                        <p>Nationality:</p>
-                                        <p>Address:</p>
-                                        <p>Languages Known:</p>
-                                        <p>Educational Attainment:</p>
-                                        <p>Religion:</p>
-                                        <p>Contact Number:</p>
-
-
-                                    </div>
-                                    <div>
-                                        <p><?php echo htmlspecialchars($staff['bdate']?? ''); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['height']?? ''); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['weight']?? ''); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['civ_stat']?? ''); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['nationality']?? ''); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['address']?? ''); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['languages']?? ''); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['educational_attainment']?? ''); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['religion']?? ''); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['cnum']?? ''); ?></p>
+                                <div>
+                                    <p><?= htmlspecialchars($staff['firstname'] ?? ''); ?></p>
+                                    <p><?= htmlspecialchars($staff['lastname'] ?? ''); ?></p>
+                                    <p><?= htmlspecialchars($staff['sex'] ?? ''); ?></p>
+                                    <p><?= htmlspecialchars($staff['age'] ?? ''); ?></p>
+                                    <p><?= htmlspecialchars($staff['shift_start'] ?? '') . ' - ' . htmlspecialchars($staff['shift_end'] ?? ''); ?></p>
                                 </div>
                             </div>
+
+                            <!-- Personal Information -->
+                            <h1>Personal Information</h1>
+                            <div class="personal-information-field">
+                                <div>
+                                    <p>Date of birth:</p>
+                                    <p>Height:</p>
+                                    <p>Weight:</p>
+                                    <p>Civil Status:</p>
+                                    <p>Nationality:</p>
+                                    <p>Address:</p>
+                                    <p>Languages Known:</p>
+                                    <p>Educational Attainment:</p>
+                                    <p>Religion:</p>
+                                    <p>Contact Number:</p>
+                                </div>
+                                <div>
+                                    <p><?= htmlspecialchars($staff['bdate'] ?? ''); ?></p>
+                                    <p><?= htmlspecialchars($staff['height'] ?? ''); ?></p>
+                                    <p><?= htmlspecialchars($staff['weight'] ?? ''); ?></p>
+                                    <p><?= htmlspecialchars($staff['civ_stat'] ?? ''); ?></p>
+                                    <p><?= htmlspecialchars($staff['nationality'] ?? ''); ?></p>
+                                    <p><?= htmlspecialchars($staff['address'] ?? ''); ?></p>
+                                    <p><?= htmlspecialchars($staff['languages'] ?? ''); ?></p>
+                                    <p><?= htmlspecialchars($staff['educational_attainment'] ?? ''); ?></p>
+                                    <p><?= htmlspecialchars($staff['religion'] ?? ''); ?></p>
+                                    <p><?= htmlspecialchars($staff['cnum'] ?? ''); ?></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="attendance-buttons">
+                            <form method="POST" action="">
+                                <input type="hidden" name="assigned_id" value="<?= htmlspecialchars($staff['assigned_id'] ?? 0); ?>">
+                                <button id="timeInButton" class="portal-btn">Time In</button>
+                                <button id="timeOutButton" class="portal-btn">Time Out</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -124,160 +249,38 @@
                             <div class="attendance-header">
                                 <h1>Daily Time Records</h1>
                                 <div class="search-bar">
-                                    <input type="text" name="search-bar" id="search-bar"
-                                        placeholder="Search something..." />
-                                    <span><i class="fa fa-search" aria-hidden="true"></i>
-                                    </span>
+                                    <input type="text" name="search-bar" id="search-bar" placeholder="Search something..." />
+                                    <span><i class="fa fa-search" aria-hidden="true"></i></span>
                                 </div>
                             </div>
                             <table class="attendance-table">
                                 <thead>
                                     <tr>
                                         <th>DATE</th>
-                                        <th>STATUS</th>
-                                        <th>SCHEDULE</th>
+                                        <th>RECORDED STATUS</th><!-- from attendance_table -->
                                         <th>CLOCK IN</th>
                                         <th>CLOCK OUT</th>
-                                        <th>LATE</th>
-                                        <th>BREAK</th>
-                                        <th>UNDERTIME</th>
                                         <th>OVERTIME</th>
-                                        <th>ACTION</th>
+                                        <th>UNDERTIME</th>
                                     </tr>
                                 </thead>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="10">
-                                            <div class="links">
-                                                <a href="#">&laquo;</a>
-                                                <a class="active" href="#">1</a> <a href="#">2</a>
-                                                <a href="#">3</a> <a href="#">4</a>
-                                                <a href="#">&raquo;</a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tfoot>
                                 <tbody>
-                                    <tr>
-                                        <td>cell1_1</td>
-                                        <td>cell2_1</td>
-                                        <td>cell3_1</td>
-                                        <td>cell4_1</td>
-                                        <td>cell5_1</td>
-                                        <td>cell6_1</td>
-                                        <td>cell7_1</td>
-                                        <td>cell8_1</td>
-                                        <td>cell9_1</td>
-                                        <td>cell10_1</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_2</td>
-                                        <td>cell2_2</td>
-                                        <td>cell3_2</td>
-                                        <td>cell4_2</td>
-                                        <td>cell5_2</td>
-                                        <td>cell6_2</td>
-                                        <td>cell7_2</td>
-                                        <td>cell8_2</td>
-                                        <td>cell9_2</td>
-                                        <td>cell10_2</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_3</td>
-                                        <td>cell2_3</td>
-                                        <td>cell3_3</td>
-                                        <td>cell4_3</td>
-                                        <td>cell5_3</td>
-                                        <td>cell6_3</td>
-                                        <td>cell7_3</td>
-                                        <td>cell8_3</td>
-                                        <td>cell9_3</td>
-                                        <td>cell10_3</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_4</td>
-                                        <td>cell2_4</td>
-                                        <td>cell3_4</td>
-                                        <td>cell4_4</td>
-                                        <td>cell5_4</td>
-                                        <td>cell6_4</td>
-                                        <td>cell7_4</td>
-                                        <td>cell8_4</td>
-                                        <td>cell9_4</td>
-                                        <td>cell10_4</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_5</td>
-                                        <td>cell2_5</td>
-                                        <td>cell3_5</td>
-                                        <td>cell4_5</td>
-                                        <td>cell5_5</td>
-                                        <td>cell6_5</td>
-                                        <td>cell7_5</td>
-                                        <td>cell8_5</td>
-                                        <td>cell9_5</td>
-                                        <td>cell10_5</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_6</td>
-                                        <td>cell2_6</td>
-                                        <td>cell3_6</td>
-                                        <td>cell4_6</td>
-                                        <td>cell5_6</td>
-                                        <td>cell6_6</td>
-                                        <td>cell7_6</td>
-                                        <td>cell8_6</td>
-                                        <td>cell9_6</td>
-                                        <td>cell10_6</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_7</td>
-                                        <td>cell2_7</td>
-                                        <td>cell3_7</td>
-                                        <td>cell4_7</td>
-                                        <td>cell5_7</td>
-                                        <td>cell6_7</td>
-                                        <td>cell7_7</td>
-                                        <td>cell8_7</td>
-                                        <td>cell9_7</td>
-                                        <td>cell10_7</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_8</td>
-                                        <td>cell2_8</td>
-                                        <td>cell3_8</td>
-                                        <td>cell4_8</td>
-                                        <td>cell5_8</td>
-                                        <td>cell6_8</td>
-                                        <td>cell7_8</td>
-                                        <td>cell8_8</td>
-                                        <td>cell9_8</td>
-                                        <td>cell10_8</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_9</td>
-                                        <td>cell2_9</td>
-                                        <td>cell3_9</td>
-                                        <td>cell4_9</td>
-                                        <td>cell5_9</td>
-                                        <td>cell6_9</td>
-                                        <td>cell7_9</td>
-                                        <td>cell8_9</td>
-                                        <td>cell9_9</td>
-                                        <td>cell10_9</td>
-                                    </tr>
-                                    <tr>
-                                        <td>cell1_10</td>
-                                        <td>cell2_10</td>
-                                        <td>cell3_10</td>
-                                        <td>cell4_10</td>
-                                        <td>cell5_10</td>
-                                        <td>cell6_10</td>
-                                        <td>cell7_10</td>
-                                        <td>cell8_10</td>
-                                        <td>cell9_10</td>
-                                        <td>cell10_10</td>
-                                    </tr>
+                                    <?php if (!empty($attendance_records)) : ?>
+                                        <?php foreach ($attendance_records as $record) : ?>
+                                            <tr>
+                                                <td><?= htmlspecialchars($record['date']); ?></td>
+                                                <td><?= htmlspecialchars($record['recorded_status']); ?></td>
+                                                <td><?= htmlspecialchars($record['time_in'] ?? '-'); ?></td>
+                                                <td><?= htmlspecialchars($record['time_out'] ?? '-'); ?></td>
+                                                <td><?= htmlspecialchars($record['overtime'] ?? '-'); ?></td>
+                                                <td><?= htmlspecialchars($record['undertime'] ?? '-'); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else : ?>
+                                        <tr>
+                                            <td colspan="7">No attendance records found.</td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -330,46 +333,24 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="section" id="documents" style="display: none">
-                    <div class="documents-window">
-                        <div class="documents-menu">
-                            <a href="#" class="add-btn">Add</a>
-                            <a href="#" class="edit-btn">Edit</a>
-                            <select name="document-sort" id="" class="sort-select">
-                                <option value="" selected disabled>Sort Options</option>
-                                <option value="Date Added">Date Added</option>
-                                <option value="Alphabetical">Alphabetical</option>
-                            </select>
-                            <div class="search-bar">
-                                <input type="text" name="search-bar" id="search-bar"
-                                    placeholder="Search something..." />
-                                <span><i class="fa fa-search" aria-hidden="true"></i> </span>
-                            </div>
-                        </div>
-                        <div class="documents-list">
-                            <a href="#" class="document-card">
-                                <span class="material-symbols-outlined"> description </span>
-                                <p class="filename">Employee_TermsAndRegulations.pdf</p>
-                                <span class="material-symbols-outlined setting">
-                                    more_vert
-                                </span>
-                            </a>
-
-                            <a href="#" class="document-card">
-                                <span class="material-symbols-outlined"> description </span>
-                                <p class="filename">DeLapaz_ApplicationForm.pdf</p>
-                                <span class="material-symbols-outlined setting">
-                                    more_vert
-                                </span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
     </main>
+
+    <!-- Modal for confirmation and success -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <p id="modalText"></p>
+            <div id="confirmationButtons" style="display: none;">
+                <button class="button" id="confirmYes">Yes</button>
+                <button class="button" id="confirmNo">No</button>
+            </div>
+            <div id="successButton" style="display: none;">
+                <button class="button" id="okButton">OK</button>
+            </div>
+        </div>
+    </div>
 </body>
 <script src="../script.js"></script>
-
 </html>

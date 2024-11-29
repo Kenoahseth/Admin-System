@@ -13,7 +13,7 @@
 
 <body>
 <?php 
-    include "components/sidebar.php"; /* linabas ko muna sa components folder kasi nagkakaproblema */
+    include "components/sidebar.php"; 
     include "components/connector.php"; 
 
 
