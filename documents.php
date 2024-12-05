@@ -162,14 +162,14 @@ if ($result->num_rows > 0) {
 </div>
 
 <script>
-    // Display chosen file name
+   
     function displayFileName() {
         const fileInput = document.getElementById('fileInput');
         const fileName = document.getElementById('file-name');
         fileName.textContent = fileInput.files[0]?.name || 'No file chosen';
     }
 
-    // Modal logic
+   
     const addDocumentButton = document.getElementById('addDocumentButton');
     const addDocumentModal = document.getElementById('addDocumentModal');
     const closeModal = document.getElementById('closeModal');

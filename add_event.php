@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $description = $_POST['description'];
 
 
-    $stmt = $conn->prepare("INSERT INTO events (event_name, event_date, description) VALUES (?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO events_table (event_name, event_date, description) VALUES (?, ?, ?)");
     $stmt->bind_param("sss", $event_name, $event_date, $description);
 
     if ($stmt->execute()) {

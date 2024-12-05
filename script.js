@@ -178,3 +178,27 @@ function filterTable() {
     // Initial fetch to populate the table
     fetchAttendance(assignedId);
 });
+
+
+function updateTotals() {
+    const basic = parseFloat(document.getElementById('basic').value) || 0;
+    const incentives = parseFloat(document.getElementById('incentives').value) || 0;
+    const overtime = parseFloat(document.getElementById('overtime').value) || 0;
+    const sss = parseFloat(document.getElementById('sss').value) || 0;
+    const pagibig = parseFloat(document.getElementById('pagibig').value) || 0;
+    const philhealth = parseFloat(document.getElementById('philhealth').value) || 0;
+
+    const total = basic + incentives + overtime;
+    const grandTotal = total - (sss + pagibig + philhealth);
+
+    document.getElementById('total').value = total.toFixed(2);
+    document.getElementById('grand_total').value = grandTotal.toFixed(2);
+}
+
+document.querySelectorAll('#basic, #incentives, #overtime, #sss, #pagibig, #philhealth')
+    .forEach(input => input.addEventListener('input', updateTotals));
+
+// Pay button click handler
+document.getElementById('payButton').addEventListener('click', function() {
+    showModal('Payment successful!');
+});

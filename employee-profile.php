@@ -6,6 +6,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
     date_default_timezone_set('Asia/Manila');
 
+    // Fetch staff details including assigned_id
     $staff_sql = "SELECT * FROM staffs_table WHERE staff_id = ?";
     $staff_stmt = $conn->prepare($staff_sql);
     $staff_stmt->bind_param("i", $staff_id);
@@ -14,17 +15,19 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     $staff = $staff_result->num_rows > 0 ? $staff_result->fetch_assoc() : null;
     $staff_stmt->close();
 
-    $salary_sql = "SELECT * FROM salary_table WHERE staff_id = ?";
-    $salary_stmt = $conn->prepare($salary_sql);
-    $salary_stmt->bind_param("i", $staff_id);
-    $salary_stmt->execute();
-    $salary_result = $salary_stmt->get_result();
-    $salary = $salary_result->num_rows > 0 ? $salary_result->fetch_assoc() : null;
-    $salary_stmt->close();
+        $assigned_id = $staff['assigned_id'];
 
-    if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fetch_attendance'])) {
+        // Fetch salary details
+        $salary_sql = "SELECT * FROM salary_table WHERE staff_id = ?";
+        $salary_stmt = $conn->prepare($salary_sql);
+        $salary_stmt->bind_param("i", $staff_id);
+        $salary_stmt->execute();
+        $salary_result = $salary_stmt->get_result();
+        $salary = $salary_result->num_rows > 0 ? $salary_result->fetch_assoc() : null;
+        $salary_stmt->close();
+
+        // Fetch attendance records
         $attendance_records = [];
-
         $sql = "SELECT at.date, st.status, at.time_in, at.time_out, at.recorded_status,
                     SEC_TO_TIME(TIMESTAMPDIFF(SECOND, at.time_in, at.time_out)) AS overtime,
                     SEC_TO_TIME(TIMESTAMPDIFF(SECOND, st.shift_start, at.time_in)) AS undertime
@@ -34,26 +37,42 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
                 ORDER BY at.date DESC";
         $stmt = $conn->prepare($sql);
         if ($stmt) {
-            $stmt->bind_param("i", $staff_id);
+            $stmt->bind_param("i", $assigned_id);
             $stmt->execute();
             $result = $stmt->get_result();
-            
+
             while ($row = $result->fetch_assoc()) {
                 $attendance_records[] = $row;
             }
             $stmt->close();
         }
-        
-        echo json_encode($attendance_records);
-        exit;
-    }
-} else {
-    $staff = null;
-    $salary = null;
-}
 
-$conn->close();
-?>
+        // Handle payslip save
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_payslip'])) {
+            $basic = floatval($_POST['basic']);
+            $incentives = floatval($_POST['incentives']);
+            $overtime = floatval($_POST['overtime']);
+            $sss = floatval($_POST['sss']);
+            $pagibig = floatval($_POST['pagibig']);
+            $philhealth = floatval($_POST['philhealth']);
+            $total = $basic + $incentives + $overtime;
+            $grand_total = $total - ($sss + $pagibig + $philhealth);
+
+            $insert_sql = "INSERT INTO salary_table (staff_id, basic, incentives, overtime, sss, pagibig, philhealth, total, grand_total) 
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $insert_stmt = $conn->prepare($insert_sql);
+            if ($insert_stmt) {
+                $insert_stmt->bind_param("idddddddd", $staff_id, $basic, $incentives, $overtime, $sss, $pagibig, $philhealth, $total, $grand_total);
+                $insert_stmt->execute();
+                $insert_stmt->close();
+            }
+        }
+    } 
+
+    
+    $conn->close(); 
+ ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -108,9 +127,12 @@ $conn->close();
                             </div>
                         </div>
 
-                        <div class="basic-information">
-                                <h1>Basic Information</h1>
-                                <br />
+        <div class="basic-information">                   
+                 <h1>Basic Information
+                     <?php if ($assigned_id): ?> <a href="edit-employees.php?employee_id=<?= htmlspecialchars($assigned_id); ?>" class="edit-link" style="font-size: 13px; margin-left: 300px;">Edit Profile</a>
+                     <?php endif; ?>
+                </h1>
+                            <br />
                                 <div class="basic-info-field">
                                     <div>
                                         <p>First Name:</p>
@@ -158,7 +180,7 @@ $conn->close();
                                         <p><?php echo htmlspecialchars($staff['cnum']); ?></p>
                                 </div>
                             </div>
-                        </div>
+                        </d>
                     </div>
                 </div>
 
@@ -209,80 +231,93 @@ $conn->close();
 
                 
                 <div class="section" id="payslip" style="display: none">
-    <div class="payslip-window">
-        <div class="profile-card">
-            <img src="../images/default-profile.png" alt="" />
+                    <div class="payslip-window">
+                        <div class="profile-card">
+                            <img src="../images/default-profile.png" alt="" />
             <p class="employee-name"><?php echo htmlspecialchars($staff['firstname'] . ' ' . $staff['lastname']); ?></p>
-            <p class="employee-role"><?php echo htmlspecialchars($staff['status']); ?></p>
-            <div class="profile-info">
-                <p>Status: <span><?php echo htmlspecialchars($staff['status']); ?></span></p>
-                <p>Email: <span><?php echo htmlspecialchars($staff['email']); ?></span></p>
-                <p>Contact Number: <span><?php echo htmlspecialchars($staff['cnum']); ?></span></p>
+                            <p class="employee-role"><?php echo htmlspecialchars($staff['status']); ?></p>
+                            <div class="profile-info">
+                                <p>Status: <span><?php echo htmlspecialchars($staff['status']); ?></span></p>
+                                <p>Email: <span><?php echo htmlspecialchars($staff['email']); ?></span></p>
+                                <p>Contact Number: <span><?php echo htmlspecialchars($staff['cnum']); ?></span></p>
+                            </div>
+                        </div>
+
+                        <form method="POST" action="">
+                            <div class="payslip-table">
+                                <h1>Payslip</h1>
+                                <div class="payslip-grid">
+                                    <p>Basic</p>
+                                    <input type="text" name="basic" id="basic" value="<?php echo htmlspecialchars($salary['basic'] ?? ''); ?>" />
+                                    <p>Incentives</p>
+                                    <input type="text" name="incentives" id="incentives" value="<?php echo htmlspecialchars($salary['incentives'] ?? ''); ?>" />
+                                    <p>Overtime</p>
+                                    <input type="text" name="overtime" id="overtime" value="<?php echo htmlspecialchars($salary['overtime'] ?? ''); ?>" />
+                                    <p class="total-qty">Total</p>
+                                    <input type="text" name="total" id="total" value="<?php echo htmlspecialchars($salary['total'] ?? ''); ?>" readonly />
+                                </div>
+                                <h3>Benefits</h3>
+                                <div class="payslip-grid">
+                                    <p>SSS</p>
+                                    <input type="text" name="sss" id="sss" value="<?php echo htmlspecialchars($salary['sss'] ?? ''); ?>" />
+                                    <p>PAGIBIG</p>
+                                    <input type="text" name="pagibig" id="pagibig" value="<?php echo htmlspecialchars($salary['pagibig'] ?? ''); ?>" />
+                                    <p>PhilHealth</p>
+                                    <input type="text" name="philhealth" id="philhealth" value="<?php echo htmlspecialchars($salary['philhealth'] ?? ''); ?>" />
+                                    <p class="total-qty">Grand Total</p>
+                                    <input type="text" name="grand_total" id="grand_total" value="<?php echo htmlspecialchars($salary['grand_total'] ?? ''); ?>" readonly />
+                                </div>
+                                <div class="button-container">
+                                    <button type="submit" name="save_payslip" class="portal-btn">Save</button>
+                                    <button type="button" id="payButton" class="portal-btn">Pay</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for confirmation and success -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <p id="modalText"></p>
+            <div id="confirmationButtons" style="display: none;">
+                <button class="button" id="confirmYes">Yes</button>
+                <button class="button" id="confirmNo">No</button>
+            </div>
+            <div id="successButton" style="display: none;">
+                <button class="button" id="okButton">OK</button>
             </div>
         </div>
-
-        <div class="payslip-table">
-            <h1>Payslip</h1>
-            <div class="payslip-grid">
-
-    <p>Basic</p>
-    
-    <input type="text" name="basic" id="basic" value="<?php echo htmlspecialchars($salary['basic'] ?? ''); ?>" />
-
-    <p>Incentives</p>
-    <input type="text" name="incentives" id="incentives" value="<?php echo htmlspecialchars($salary['incentives'] ?? ''); ?>" />
-
-    <p>Overtime</p>
-    <input type="text" name="overtime" id="overtime" value="<?php echo htmlspecialchars($salary['overtime'] ?? ''); ?>" />
-
-    <p class="total-qty">Total</p>
-    <input type="text" name="total" id="total" value="<?php echo htmlspecialchars($salary['total'] ?? ''); ?>" readonly />
     </div>
-    
-    <h3>Benefits</h3>
-    <div class="payslip-grid">
-    <p>SSS</p>
-    <input type="text" name="sss" id="sss" value="<?php echo htmlspecialchars($salary['sss'] ?? ''); ?>" />
 
-    <p>PAGIBIG</p>
-    <input type="text" name="pagibig" id="pagibig" value="<?php echo htmlspecialchars($salary['pagibig'] ?? ''); ?>" />
+    <script src="script.js"></script>
+    <script>
+        function updateTotals() {
+            const basic = parseFloat(document.getElementById('basic').value) || 0;
+            const incentives = parseFloat(document.getElementById('incentives').value) || 0;
+            const overtime = parseFloat(document.getElementById('overtime').value) || 0;
+            const sss = parseFloat(document.getElementById('sss').value) || 0;
+            const pagibig = parseFloat(document.getElementById('pagibig').value) || 0;
+            const philhealth = parseFloat(document.getElementById('philhealth').value) || 0;
 
-    <p>PhilHealth</p>
-    <input type="text" name="philhealth" id="philhealth" value="<?php echo htmlspecialchars($salary['philhealth'] ?? ''); ?>" />
+            const total = basic + incentives + overtime;
+            const grandTotal = total + sss + pagibig + philhealth;
 
-    
-    <p class="total-qty">Grand Total</p>
-    <input type="text" name="grand_total" id="grand_total" value="<?php echo htmlspecialchars($staff['grand_total'] ?? ''); ?>" readonly />
-</div>
-        </div>
-    </div>
-</div>
-<script src="script.js">            
-</script>
+            document.getElementById('total').value = total.toFixed(2);
+            document.getElementById('grand_total').value = grandTotal.toFixed(2);
+        }
 
-<script>
-    function updateTotals() {
-        // Get the values from input fields, defaulting to 0 if empty
-        const basic = parseFloat(document.getElementById('basic').value) || 0;
-        const incentives = parseFloat(document.getElementById('incentives').value) || 0;
-        const overtime = parseFloat(document.getElementById('overtime').value) || 0;
+        document.querySelectorAll('#basic, #incentives, #overtime, #sss, #pagibig, #philhealth')
+            .forEach(input => input.addEventListener('input', updateTotals));
 
-        const sss = parseFloat(document.getElementById('sss').value) || 0;
-        const pagibig = parseFloat(document.getElementById('pagibig').value) || 0;
-        const philhealth = parseFloat(document.getElementById('philhealth').value) || 0;
-
-        // Calculate Total and Grand Total
-        const total = basic + incentives + overtime;
-        const grandTotal = total + sss + pagibig + philhealth;
-
-        // Update the Total and Grand Total fields
-        document.getElementById('total').value = total.toFixed(2);
-        document.getElementById('grand_total').value = grandTotal.toFixed(2);
-    }
-
-    // Add a single event listener for all relevant fields
-    document.querySelectorAll('#basic, #incentives, #overtime, #sss, #pagibig, #philhealth')
-        .forEach(input => input.addEventListener('input', updateTotals));
-</script>
+        // Pay button click handler
+        document.getElementById('payButton').addEventListener('click', function() {
+            showModal('Payment successful!');
+        });
+    </script>
 </body>
 </html>

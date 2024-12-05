@@ -39,8 +39,8 @@
 
         <section class="employees-list-section">
             <div class="top-buttons">
-                <a href="components/add-employees.php" class="add-btn">Add</a>
-                <a href="components/edit-employees.php" class="edit-btn">Edit</a>
+                <a href="add-employees.php" class="add-btn">Add</a>
+                <a href="edit-employees.php" class="edit-btn">Edit</a>
                 <select name="sort" id="" class="sort-select">
                     <option value="" selected disabled>Sort</option>
                     <option value="newest">Newest First</option>

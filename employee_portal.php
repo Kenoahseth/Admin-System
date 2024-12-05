@@ -1,11 +1,11 @@
 <?php
 date_default_timezone_set('Asia/Manila');
+include 'components/connector.php';
+include "components/logactivity.php";
 
-
-include "components/connector.php"; 
 $staff = [];
 $attendance_records = [];
-
+$salary = [];
 
 if (isset($_GET['employee_id'])) {
     $employee_id = intval($_GET['employee_id']);
@@ -20,15 +20,27 @@ if (isset($_GET['employee_id'])) {
     
         if ($result->num_rows > 0) {
             $staff = $result->fetch_assoc();
+            $staff_id = $staff['staff_id']; // Get the staff_id
         }
         $stmt->close();
     }
 }
 
+
+   // Fetch salary details
+   $salary_sql = "SELECT * FROM salary_table WHERE staff_id = ?";
+   $salary_stmt = $conn->prepare($salary_sql);
+   $salary_stmt->bind_param("i", $staff_id);
+   $salary_stmt->execute();
+   $salary_result = $salary_stmt->get_result();
+   $salary = $salary_result->num_rows > 0 ? $salary_result->fetch_assoc() : null;
+   $salary_stmt->close();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $assigned_id = intval($_POST['assigned_id']);
     $current_time = date('H:i:s');
     $current_date = date('Y-m-d');
+    $user_recorded = 'admin'; // Replace with the actual username or user ID
 
     if (isset($_POST['time_in'])) {
         // Insert or update Time In and set recorded_status to Active
@@ -40,6 +52,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("iss", $assigned_id, $current_time, $current_date);
             $stmt->execute();
             $stmt->close();
+
+            // Log the time-in activity
+            $activity_name = "Time In";
+            $data_recorded = "Employee ID: $assigned_id, Time In: $current_time, Date: $current_date";
+            record_log($conn, $activity_name, $data_recorded, $user_recorded);
         }
 
         // Update status to Active in staffs_table
@@ -49,6 +66,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("i", $assigned_id);
             $stmt->execute();
             $stmt->close();
+
+            // Log the status update
+            $activity_name = "Status Update";
+            $data_recorded = "Employee ID: $assigned_id, Status: Active";
+            record_log($conn, $activity_name, $data_recorded, $user_recorded);
         }
     }
 
@@ -60,6 +82,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("sis", $current_time, $assigned_id, $current_date);
             $stmt->execute();
             $stmt->close();
+
+            // Log the time-out activity
+            $activity_name = "Time Out";
+            $data_recorded = "Employee ID: $assigned_id, Time Out: $current_time, Date: $current_date";
+            record_log($conn, $activity_name, $data_recorded, $user_recorded);
         }
 
         // Update status to Inactive in staffs_table
@@ -69,11 +96,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("i", $assigned_id);
             $stmt->execute();
             $stmt->close();
+
+            // Log the status update
+            $activity_name = "Status Update";
+            $data_recorded = "Employee ID: $assigned_id, Status: Inactive";
+            record_log($conn, $activity_name, $data_recorded, $user_recorded);
         }
     }
 }
-
-
 
 // Handle API request for fetching attendance records
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fetch_attendance'])) {
@@ -148,7 +178,6 @@ displayTime();
                 <span>STAFFS AND EMPLOYEES</span>
             </div>
 
-            <!-- Employee ID Form -->
             <form class="emp-id" method="GET" action="">
                 <input class="emp-input" type="number" name="employee_id" placeholder="Enter Employee ID" required>
                 <button type="submit"></button>
@@ -233,107 +262,109 @@ displayTime();
                             </div>
                         </div>
 
+                        
                         <div class="attendance-buttons">
-                            <form method="POST" action="">
-                                <input type="hidden" name="assigned_id" value="<?= htmlspecialchars($staff['assigned_id'] ?? 0); ?>">
-                                <button id="timeInButton" class="portal-btn">Time In</button>
-                                <button id="timeOutButton" class="portal-btn">Time Out</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+    <form method="POST" action="">
+        <input type="hidden" name="assigned_id" value="<?= htmlspecialchars($staff['assigned_id'] ?? 0); ?>">
+        <button id="timeInButton" class="portal-btn" <?php echo empty($staff['assigned_id']) ? 'disabled' : ''; ?>>Time In</button>
+        <button id="timeOutButton" class="portal-btn" <?php echo (empty($staff['assigned_id']) || $staff['status'] !== 'Active') ? 'disabled' : ''; ?>>Time Out</button>
+    </form>
+</div>
+</div>
+</div>
 
-                <div class="section" id="attendance" style="display: none">
-                    <div class="attendance-window">
-                        <div>
-                            <div class="attendance-header">
-                                <h1>Daily Time Records</h1>
-                                <div class="search-bar">
-                                    <input type="text" name="search-bar" id="search-bar" placeholder="Search something..." />
-                                    <span><i class="fa fa-search" aria-hidden="true"></i></span>
-                                </div>
-                            </div>
-                            <table class="attendance-table">
-                                <thead>
-                                    <tr>
-                                        <th>DATE</th>
-                                        <th>RECORDED STATUS</th><!-- from attendance_table -->
-                                        <th>CLOCK IN</th>
-                                        <th>CLOCK OUT</th>
-                                        <th>OVERTIME</th>
-                                        <th>UNDERTIME</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (!empty($attendance_records)) : ?>
-                                        <?php foreach ($attendance_records as $record) : ?>
-                                            <tr>
-                                                <td><?= htmlspecialchars($record['date']); ?></td>
-                                                <td><?= htmlspecialchars($record['recorded_status']); ?></td>
-                                                <td><?= htmlspecialchars($record['time_in'] ?? '-'); ?></td>
-                                                <td><?= htmlspecialchars($record['time_out'] ?? '-'); ?></td>
-                                                <td><?= htmlspecialchars($record['overtime'] ?? '-'); ?></td>
-                                                <td><?= htmlspecialchars($record['undertime'] ?? '-'); ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php else : ?>
-                                        <tr>
-                                            <td colspan="7">No attendance records found.</td>
-                                        </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="section" id="payslip" style="display: none">
-                    <div class="payslip-window">
-                        <div class="profile-card">
-                            <img src="../images/room-service.png" alt="" />
-                            <p class="employee-name">Sarah DeLapaz</p>
-                            <p class="employee-role">Room Service</p>
-                            <div class="profile-info">
-                                <p>Status: <span>Active</span></p>
-                                <p>Email: <span>blahblah@gmail.com</span></p>
-                                <p>Contact Number: <span>0912 876 1223</span></p>
-                            </div>
-                        </div>
-
-                        <div class="payslip-table">
-                            <h1>Payslip</h1>
-                            <div class="payslip-grid">
-                                <p>Basic</p>
-                                <span>15,000</span>
-                                <p>Incentives</p>
-                                <span>0.00</span>
-                                <p>Overtime</p>
-                                <span>2,017.00</span>
-                                <p class="total-qty">Total</p>
-                                <span class="total-qty">17,017.00</span>
-                            </div>
-
-                            <h3>Benefits</h3>
-                            <div class="payslip-grid">
-                                <p>SSS</p>
-                                <span>800.00</span>
-                                <p>PAGIBIG</p>
-                                <span>100.00</span>
-                                <p>PhilHealth</p>
-                                <span>412.50</span>
-                                <p class="total-qty">Total</p>
-                                <span class="total-qty" style="margin-bottom: 2rem">1,312.50</span>
-                                <div></div>
-                                <p>17,017.00</p>
-                                <div></div>
-                                <p>-1,312.00</p>
-                                <p class="total-qty">Grand Total</p>
-                                <span class="total-qty">15,704.50</span>
-                            </div>
-                        </div>
-                    </div>
+<div class="section" id="attendance" style="display: none">
+    <div class="attendance-window">
+        <div>
+            <div class="attendance-header">
+                <h1>Daily Time Records</h1>
+                <div class="search-bar">
+                    <input type="text" name="search-bar" id="search-bar" placeholder="Search something..." />
+                    <span><i class="fa fa-search" aria-hidden="true"></i></span>
                 </div>
             </div>
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>DATE</th>
+                        <th>RECORDED STATUS</th>
+                        <th>CLOCK IN</th>
+                        <th>CLOCK OUT</th>
+                        <th>OVERTIME</th>
+                        <th>UNDERTIME</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($attendance_records)) : ?>
+                        <?php foreach ($attendance_records as $record) : ?>
+                            <tr>
+                                <td><?= htmlspecialchars($record['date']); ?></td>
+                                <td><?= htmlspecialchars($record['recorded_status']); ?></td>
+                                <td><?= htmlspecialchars($record['time_in'] ?? '-'); ?></td>
+                                <td><?= htmlspecialchars($record['time_out'] ?? '-'); ?></td>
+                                <td><?= htmlspecialchars($record['overtime'] ?? '-'); ?></td>
+                                <td><?= htmlspecialchars($record['undertime'] ?? '-'); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <tr>
+                            <td colspan="7">No attendance records found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+                <!-- payslip goes here -->
+                 
+                <div class="section" id="payslip" style="display: none">
+    <div class="payslip-window">
+        <div class="profile-card">
+            <img src="../images/default-profile.png" alt="" />
+            <p class="employee-name">
+                <?php echo htmlspecialchars((isset($staff['firstname']) ? $staff['firstname'] : '') . ' ' . (isset($staff['lastname']) ? $staff['lastname'] : '')); ?>
+            </p>
+            <p class="employee-role"><?php echo htmlspecialchars($staff['status'] ?? ''); ?></p>
+            <div class="profile-info">
+                <p>Status: <span><?php echo htmlspecialchars($staff['status'] ?? ''); ?></span></p>
+                <p>Email: <span><?php echo htmlspecialchars($staff['email'] ?? ''); ?></span></p>
+                <p>Contact Number: <span><?php echo htmlspecialchars($staff['cnum'] ?? ''); ?></span></p>
+            </div>
+        </div>
+
+        <div class="payslip-table">
+            <h1>Payslip</h1>
+            <div class="payslip-grid">
+                <p>Basic</p>
+                <p><?php echo htmlspecialchars($salary['basic'] ?? ''); ?></p>
+                <p>Incentives</p>
+                <p><?php echo htmlspecialchars($salary['incentives'] ?? ''); ?></p>
+                <p>Overtime</p>
+                <p><?php echo htmlspecialchars($salary['overtime'] ?? ''); ?></p>
+                <p class="total-qty">Total</p>
+                <p><?php echo htmlspecialchars($salary['total'] ?? ''); ?></p>
+            </div>
+            <h3>Benefits</h3>
+            <div class="payslip-grid">
+                <p>SSS</p>
+                <p><?php echo htmlspecialchars($salary['sss'] ?? ''); ?></p>
+                <p>PAGIBIG</p>
+                <p><?php echo htmlspecialchars($salary['pagibig'] ?? ''); ?></p>
+                <p>PhilHealth</p>
+                <p><?php echo htmlspecialchars($salary['philhealth'] ?? ''); ?></p>
+                <p class="total-qty">Grand Total</p>
+                <p><?php echo htmlspecialchars($salary['grand_total'] ?? ''); ?></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
         </section>
     </main>
 

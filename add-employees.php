@@ -1,11 +1,12 @@
-<?php include "connector.php";
+<?php 
+include 'components/connector.php';
+include "components/logactivity.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $firstname = $_POST['firstname'];
     $lastname = $_POST['lastname'];
     $sex = $_POST['sex'];
     $age = $_POST['age'];
-    $shift = $_POST['shift'];
     $shift_start = $_POST['shift_start'];
     $shift_end = $_POST['shift_end'];
     $bdate = $_POST['bdate'];
@@ -15,14 +16,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $religion = $_POST['religion'];
     $educational_attainment = $_POST['educational_attainment'];
     $cnum = $_POST['cnum'];
-    $assigned_id = $_POST ['assigned_id'];
+    $assigned_id = $_POST['assigned_id'];
+    $user_recorded = 'admin';
 
-
-    $sql = "INSERT INTO staffs_table (firstname, lastname, sex, age, shift_start, shift_end, bdate, civ_stat, nationality, address, religion, educational_attainment, cnum , assigned_id)
-            VALUES ('$firstname', '$lastname', '$sex', '$age', '$shift_start', '$shift_end', '$bdate', '$civ_stat', '$nationality', '$address', '$religion', '$educational_attainment', '$cnum' ,'$assigned_id' )";
+    $sql = "INSERT INTO staffs_table (firstname, lastname, sex, age, shift_start, shift_end, bdate, civ_stat, nationality, address, religion, educational_attainment, cnum, assigned_id)
+            VALUES ('$firstname', '$lastname', '$sex', '$age', '$shift_start', '$shift_end', '$bdate', '$civ_stat', '$nationality', '$address', '$religion', '$educational_attainment', '$cnum', '$assigned_id')";
 
     if ($conn->query($sql) === TRUE) {
-        echo "New employee added successfully";
+        $activity_name = "Add Employee"; 
+        $data_recorded = "Employee: $firstname $lastname, ID: $assigned_id";
+        record_log($conn, $activity_name, $data_recorded, $user_recorded);
+        echo "<script>alert('New employee added successfully');</script>";
     } else {
         echo "Error: " . $sql . "<br>" . $conn->error;
     }
@@ -38,12 +42,11 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Employees List</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="../styles.css" />
 </head>
 <body>
-    <?php include "components/sidebar.php"; ?>
+    <?php include 'components/sidebar.php'; ?>
 
     <main style="margin-left: 85px">
         <div class="breadcrumbs">
@@ -80,12 +83,12 @@ $conn->close();
                         </div>
                         <div class="grid-div shift-flex">
                             <div>
-                            <label for="sex">Sex:</label><br />
-                            <select name="sex" required>
-                                <option value="" disabled selected>Choose one:</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                            </select>
+                                <label for="sex">Sex:</label><br />
+                                <select name="sex" required>
+                                    <option value="" disabled selected>Choose one:</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
                             </div>
                             <div>
                                 <label for="age">Age:</label>

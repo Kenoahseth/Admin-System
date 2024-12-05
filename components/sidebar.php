@@ -19,8 +19,8 @@
         <li>
             <a href="documents.php"><span class="material-symbols-outlined"> folder_open </span>Documents</a>
         </li>
-        <li>
-            <a href="messages.php"><span class="material-symbols-outlined"> mail </span>Messages</a>
+        <li> <!-- Put gmail link here -->
+            <a href="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox" target="_blank"><span class="material-symbols-outlined"> mail </span>Messages</a>
         </li>
         <li>
             <a href="calendar.php"><span class="material-symbols-outlined"> calendar_month </span>Calendar</a>

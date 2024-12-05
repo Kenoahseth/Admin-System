@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'admin') {
 include 'components/connector.php'; 
 
 // Query for events
-$sql_events = "SELECT event_id, event_name, event_date, event_organizer FROM events_table";
+$sql_events = "SELECT * FROM events_table";
 $result_events = $conn->query($sql_events);
 
 // Query for total employees
@@ -27,7 +27,7 @@ $row_active_today = $result_active_today->fetch_assoc();
 $active_today_count = $row_active_today['active_today'];
 
 // Query for absent today
-$sql_absent_today = "SELECT COUNT(*) AS absent_today FROM staffs_table WHERE status = 'absent'";
+$sql_absent_today = "SELECT COUNT(*) AS absent_today FROM staffs_table WHERE status = 'inactive'";
 $result_absent_today = $conn->query($sql_absent_today);
 
 $row_absent_today = $result_absent_today->fetch_assoc();
@@ -40,7 +40,9 @@ $result_leave_today = $conn->query($sql_leave_today);
 $row_leave_today = $result_leave_today->fetch_assoc();
 $leave_today_count = $row_leave_today['leave_today'];
 
-
+// Fetch logs from the database
+$sql_logs = "SELECT activity_name, data_recorded, user_recorded, date_recorded FROM logs_table ORDER BY date_recorded DESC";
+$result_logs = $conn->query($sql_logs);
 ?>
 
 
@@ -108,96 +110,119 @@ $leave_today_count = $row_leave_today['leave_today'];
             <div class="events-container">
                 <div class="events-panel">
                     <h1>Events</h1>
+                    <div class="events-cards">
                     <?php 
                     
                     if ($result_events -> num_rows > 0) {
                         while($row = $result_events -> fetch_assoc()) {?>
 
-                    <a href="#" class="event-card">
-                        <span class="material-symbols-outlined">event</span>
-                        <h3 class="event-name">
-                            <?= htmlspecialchars($row['event_name']);?>
-                        </h3>
-                        <p class="event-date"><?= date("F j, Y", strtotime($row['event_date']))?></p>
-                        <p class="event-coordinator"><?= htmlspecialchars($row['event_organizer'])?></p>
-                    </a>
-
+<a href="#" class="event-card" 
+   data-event_name="<?= htmlspecialchars($row['event_name']); ?>"
+   data-event_date="<?= date("F j, Y", strtotime($row['event_date'])) ?>"
+   data-event_organizer="<?= htmlspecialchars($row['event_organizer']) ?>"
+   data-event_description="<?= htmlspecialchars($row['event_description']) ?>">
+    <span class="material-symbols-outlined">event</span>
+    <h3 class="event-name"><?= htmlspecialchars($row['event_name']); ?></h3>
+    <p class="event-date"><?= date("F j, Y", strtotime($row['event_date'])) ?></p>
+    <p class="event-coordinator"><?= htmlspecialchars($row['event_organizer']) ?></p>
+</a>
                     <?php }
                         } else {?>
                     <p>No events found</p>
                     <?php }?>
-                </div>
-            </div>
-
-            <div class="activity-log-container">
-                <h1>Activity Log</h1>
-                <div class="activity-flex">
-                    <div class="activity-card">
-                        <p class="activity-name">Sample Activity</p>
-                        <div class="activity-date">
-                            <p>October 21, 2024</p>
-                            <p>10:24AM</p>
-                        </div>
-                    </div>
-
-                    <div class="activity-card">
-                        <p class="activity-name">Sample Activity</p>
-                        <div class="activity-date">
-                            <p>October 21, 2024</p>
-                            <p>10:24AM</p>
-                        </div>
-                    </div>
-
-                    <div class="activity-card">
-                        <p class="activity-name">Sample Activity</p>
-                        <div class="activity-date">
-                            <p>October 21, 2024</p>
-                            <p>10:24AM</p>
-                        </div>
-                    </div>
-
-                    <div class="activity-card">
-                        <p class="activity-name">Sample Activity</p>
-                        <div class="activity-date">
-                            <p>October 21, 2024</p>
-                            <p>10:24AM</p>
-                        </div>
-                    </div>
-
-                    <div class="activity-card">
-                        <p class="activity-name">Sample Activity</p>
-                        <div class="activity-date">
-                            <p>October 21, 2024</p>
-                            <p>10:24AM</p>
-                        </div>
-                    </div>
-
-                    <div class="activity-card">
-                        <p class="activity-name">Sample Activity</p>
-                        <div class="activity-date">
-                            <p>October 21, 2024</p>
-                            <p>10:24AM</p>
-                        </div>
-                    </div>
-
-                    <div class="activity-card">
-                        <p class="activity-name">Sample Activity</p>
-                        <div class="activity-date">
-                            <p>October 21, 2024</p>
-                            <p>10:24AM</p>
-                        </div>
-                    </div>
-
-                    <div class="activity-card">
-                        <p class="activity-name">Sample Activity</p>
-                        <div class="activity-date">
-                            <p>October 21, 2024</p>
-                            <p>10:24AM</p>
-                        </div>
                     </div>
                 </div>
             </div>
+
+ <div class="activity-log-container"> <!-- Activity Logs -->
+    <h1>Activity Log</h1>
+    <div class="activity-flex">
+        <?php 
+        if ($result_logs->num_rows > 0) {
+            while($log = $result_logs->fetch_assoc()) { ?>
+                <div class="activity-card">
+                    <p class="activity-name"><?= htmlspecialchars($log['activity_name']); ?></p>
+                    <p style="font-size:13px"class="activity-details"><?= htmlspecialchars($log['data_recorded']); ?></p>
+                    
+                    <div class="activity-date">
+                        <p><?= date("F j, Y", strtotime($log['date_recorded'])); ?></p>
+                        <p><?= date("g:i A", strtotime($log['date_recorded'])); ?></p>
+                    </div>
+                </div>
+                
+        <?php } 
+        } else { ?>
+            <p>No logs found</p>
+        <?php } ?>
+    </div>
+</div>
+
         </section>
+
+ <!-- Modal Structure -->
+ <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2 id="modalEventName"></h2>
+            <p id="modalEventDate"></p>
+            <p id="modalEventOrganizer"></p>
+            <p id="modalEventDescription"></p>
+        </div>
+    </div>
+
+    <script>
+    
+       // Get modal element
+var modal = document.getElementById("eventModal");
+var closeModal = document.getElementById("closeModal");
+
+// Function to open modal with event details
+function openModal(event) {
+    document.getElementById("modalEventName").textContent = event.target.dataset.event_name;
+    document.getElementById("modalEventDate").textContent = event.target.dataset.event_date;
+    document.getElementById("modalEventOrganizer").textContent = event.target.dataset.event_organizer;
+    document.getElementById("modalEventDescription").textContent = event.target.dataset.event_description;
+    modal.style.display = "block";
+}
+
+// Event listener for event cards
+document.querySelectorAll(".event-card").forEach(function(card) {
+        card.addEventListener("click", function(e) {
+            e.preventDefault(); // Prevent default anchor behavior
+
+            // Handle the click event for the entire card
+            var targetCard = e.currentTarget;
+
+            document.getElementById("modalEventName").textContent = targetCard.dataset.event_name;
+            document.getElementById("modalEventDate").textContent = targetCard.dataset.event_date;
+            document.getElementById("modalEventOrganizer").textContent = targetCard.dataset.event_organizer;
+            document.getElementById("modalEventDescription").textContent = targetCard.dataset.event_description;
+            
+            eventModal.style.display = "block";
+        });
+    });
+
+
+// Event listener to close modal
+closeModal.onclick = function() {
+    modal.style.display = "none";
+}
+
+// Close modal if user clicks outside of it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+    </script>
+
+
+
+
+
+
+        
     </main>
 </body>
 
