@@ -71,7 +71,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $activity_name = "Status Update";
             $data_recorded = "Employee ID: $assigned_id, Status: Active";
             record_log($conn, $activity_name, $data_recorded, $user_recorded);
+       
         }
+          // Clear the assigned_id and redirect
+      $_POST['assigned_id'] = ''; // Clear the assigned_id
+      header("Location: " . $_SERVER['REQUEST_URI']);
+      exit();
     }
 
     if (isset($_POST['time_out'])) {
@@ -101,7 +106,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $activity_name = "Status Update";
             $data_recorded = "Employee ID: $assigned_id, Status: Inactive";
             record_log($conn, $activity_name, $data_recorded, $user_recorded);
+       
+    
         }
+          // Clear the assigned_id and redirect
+      $_POST['assigned_id'] = ''; // Clear the assigned_id
+      header("Location: " . $_SERVER['REQUEST_URI']);
+      exit();
     }
 }
 
@@ -264,14 +275,16 @@ displayTime();
 
                         
                         <div class="attendance-buttons">
-    <form method="POST" action="">
-        <input type="hidden" name="assigned_id" value="<?= htmlspecialchars($staff['assigned_id'] ?? 0); ?>">
-        <button id="timeInButton" class="portal-btn" <?php echo empty($staff['assigned_id']) ? 'disabled' : ''; ?>>Time In</button>
-        <button id="timeOutButton" class="portal-btn" <?php echo (empty($staff['assigned_id']) || $staff['status'] !== 'Active') ? 'disabled' : ''; ?>>Time Out</button>
+     <form method="POST" action="" id="attendanceForm">
+        <input type="hidden" name="assigned_id" value="<?= htmlspecialchars($staff['assigned_id'] ?? ''); ?>">
+        <button type="button" id="timeInButton" class="portal-btn" <?php echo (empty($staff['assigned_id']) || $staff['status'] !== 'Inactive')? 'disabled' : ''; ?>>Time In</button>
+        <button type="button" id="timeOutButton" class="portal-btn" <?php echo (empty($staff['assigned_id']) || $staff['status'] !== 'Active') ? 'disabled' : ''; ?>>Time Out</button>
+        <input type="hidden" name="action" id="actionInput">
     </form>
 </div>
+</div>  
 </div>
-</div>
+
 
 
 <div class="section" id="attendance" style="display: none">
@@ -383,5 +396,61 @@ displayTime();
         </div>
     </div>
 </body>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const timeInButton = document.getElementById("timeInButton");
+    const timeOutButton = document.getElementById("timeOutButton");
+    const modal = document.getElementById("modal");
+    const modalText = document.getElementById("modalText");
+    const confirmationButtons = document.getElementById("confirmationButtons");
+    const successButton = document.getElementById("successButton");
+    const closeModal = document.getElementById("closeModal");
+    const confirmYes = document.getElementById("confirmYes");
+    const confirmNo = document.getElementById("confirmNo");
+    const okButton = document.getElementById("okButton");
+    const attendanceForm = document.getElementById("attendanceForm");
+    const actionInput = document.getElementById("actionInput");
+
+    function showModal(message, showConfirmation) {
+        modalText.textContent = message;
+        confirmationButtons.style.display = showConfirmation ? "block" : "none";
+        successButton.style.display = !showConfirmation ? "block" : "none";
+        modal.style.display = "block";
+    }
+
+    function hideModal() {
+        modal.style.display = "none";
+    }
+
+    timeInButton.addEventListener("click", function() {
+        showModal("Are you sure you want to Time In?", true);
+        actionInput.value = "time_in";
+    });
+
+    timeOutButton.addEventListener("click", function() {
+        showModal("Are you sure you want to Time Out?", true);
+        actionInput.value = "time_out";
+    });
+
+    confirmYes.addEventListener("click", function() {
+        hideModal();
+        attendanceForm.submit();
+    });
+
+    confirmNo.addEventListener("click", function() {
+        hideModal();
+    });
+
+    closeModal.addEventListener("click", function() {
+        hideModal();
+    });
+
+    okButton.addEventListener("click", function() {
+        hideModal();
+        location.reload(); // Reload the page to reset everything
+    });
+});
+</script>
 <script src="../script.js"></script>
 </html>

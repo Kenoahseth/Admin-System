@@ -202,3 +202,5 @@ document.querySelectorAll('#basic, #incentives, #overtime, #sss, #pagibig, #phil
 document.getElementById('payButton').addEventListener('click', function() {
     showModal('Payment successful!');
 });
+
+//time in and out ajax
