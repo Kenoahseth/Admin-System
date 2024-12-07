@@ -26,7 +26,6 @@ if (isset($_GET['employee_id'])) {
     }
 }
 
-
    // Fetch salary details
    $salary_sql = "SELECT * FROM salary_table WHERE staff_id = ?";
    $salary_stmt = $conn->prepare($salary_sql);
@@ -148,12 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fetch_attendance'])) {
 
 $conn->close();
 ?>
-
-
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -164,24 +159,22 @@ $conn->close();
     <link rel="stylesheet" href="../styles.css" />
     <script src="attendance.js"></script>
 </head>
-
 <body>
     <script>
-       function displayTime() {
-    const now = new Date();
-    const options = {
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-        timeZone: 'Asia/Manila',
-        hour12: true
-    };
-    const formattedTime = now.toLocaleTimeString('en-US', options);
-    document.getElementById('currentTime').textContent = formattedTime;
-}
-setInterval(displayTime, 1000);
-displayTime();
-
+        function displayTime() {
+            const now = new Date();
+            const options = {
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+                timeZone: 'Asia/Manila',
+                hour12: true
+            };
+            const formattedTime = now.toLocaleTimeString('en-US', options);
+            document.getElementById('currentTime').textContent = formattedTime;
+        }
+        setInterval(displayTime, 1000);
+        displayTime();
     </script>
     <main>
         <div class="breadcrumbs">
@@ -211,7 +204,7 @@ displayTime();
                     <div class="personal-info-window">
                         <!-- Profile Card -->
                         <div class="profile-card">
-                            <img src="../images/default-profile.png" alt="Profile Picture" />
+                            <img src="<?= htmlspecialchars($staff['profile_picture'] ?? '../images/default-profile.png'); ?>" alt="Profile Picture" />
                             <p class="employee-name">
                                 <?= htmlspecialchars($staff['firstname'] ?? 'Employee name') . ' ' . htmlspecialchars($staff['lastname'] ?? ''); ?>
                             </p>
@@ -222,6 +215,8 @@ displayTime();
                                 <p>Contact Number: <span><?= htmlspecialchars($staff['cnum'] ?? ''); ?></span></p>
                             </div>
                         </div>
+
+
 
                         <!-- Basic Information -->
                         <div class="basic-information">

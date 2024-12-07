@@ -16,8 +16,7 @@
     include "components/sidebar.php"; 
     include "components/connector.php"; 
 
-
-    $sql = "SELECT staff_id, firstname, lastname, status, shift_start, shift_end FROM staffs_table";
+    $sql = "SELECT staff_id, firstname, lastname, status, shift_start, shift_end, profile_picture, position FROM staffs_table";
     $result = $conn->query($sql);
     ?>
 
@@ -56,15 +55,17 @@
                         $fullName = htmlspecialchars($row['firstname'] . ' ' . $row['lastname']);
                         $statusColor = ($row['status'] === 'Active') ? 'green' : 'red';
 
+                        $profilePicture = !empty($row['profile_picture']) ? htmlspecialchars($row['profile_picture']) : 'images/default-profile.png';
+
                         echo '<a href="employee-profile.php?id=' . $row['staff_id'] . '">
                                 <div class="employee-card">
-                                    <img src="images/default-profile.png" alt="Employee Image" class="employee-img" />
+                                    <img src="' . $profilePicture . '" alt="Employee Image" class="employee-img" />
                                     <div class="employee-info">
                                         <div class="employee-flex">
                                             <p class="employee-name">' . $fullName . '</p>
                                             <span class="employee-status" style="color: ' . $statusColor . '">' . htmlspecialchars($row['status']) . '</span>
                                         </div>
-                                        <p class="employee-position">Position Not Available</p> <!-- Placeholder if you don’t have a position column -->
+                                        <p class="employee-position">' . htmlspecialchars($row['position']) . '</p>
                                         <p class="employee-schedule">Shift: ' . htmlspecialchars($row['shift_start']).' - '.htmlspecialchars($row['shift_end']) . '</p>
                                     </div>
                                 </div>

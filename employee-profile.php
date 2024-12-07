@@ -15,68 +15,65 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     $staff = $staff_result->num_rows > 0 ? $staff_result->fetch_assoc() : null;
     $staff_stmt->close();
 
-        $assigned_id = $staff['assigned_id'];
+    $assigned_id = $staff['assigned_id'];
 
-        // Fetch salary details
-        $salary_sql = "SELECT * FROM salary_table WHERE staff_id = ?";
-        $salary_stmt = $conn->prepare($salary_sql);
-        $salary_stmt->bind_param("i", $staff_id);
-        $salary_stmt->execute();
-        $salary_result = $salary_stmt->get_result();
-        $salary = $salary_result->num_rows > 0 ? $salary_result->fetch_assoc() : null;
-        $salary_stmt->close();
+    // Fetch salary details
+    $salary_sql = "SELECT * FROM salary_table WHERE staff_id = ?";
+    $salary_stmt = $conn->prepare($salary_sql);
+    $salary_stmt->bind_param("i", $staff_id);
+    $salary_stmt->execute();
+    $salary_result = $salary_stmt->get_result();
+    $salary = $salary_result->num_rows > 0 ? $salary_result->fetch_assoc() : null;
+    $salary_stmt->close();
 
-        // Fetch attendance records
-        $attendance_records = [];
-        $sql = "SELECT at.date, st.status, at.time_in, at.time_out, at.recorded_status,
-                    SEC_TO_TIME(TIMESTAMPDIFF(SECOND, at.time_in, at.time_out)) AS overtime,
-                    SEC_TO_TIME(TIMESTAMPDIFF(SECOND, st.shift_start, at.time_in)) AS undertime
-                FROM attendance_table at
-                JOIN staffs_table st ON at.assigned_id = st.assigned_id
-                WHERE at.assigned_id = ?
-                ORDER BY at.date DESC";
-        $stmt = $conn->prepare($sql);
-        if ($stmt) {
-            $stmt->bind_param("i", $assigned_id);
-            $stmt->execute();
-            $result = $stmt->get_result();
+    // Fetch attendance records
+    $attendance_records = [];
+    $sql = "SELECT at.date, st.status, at.time_in, at.time_out, at.recorded_status,
+                SEC_TO_TIME(TIMESTAMPDIFF(SECOND, at.time_in, at.time_out)) AS overtime,
+                SEC_TO_TIME(TIMESTAMPDIFF(SECOND, st.shift_start, at.time_in)) AS undertime
+            FROM attendance_table at
+            JOIN staffs_table st ON at.assigned_id = st.assigned_id
+            WHERE at.assigned_id = ?
+            ORDER BY at.date DESC";
+    $stmt = $conn->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param("i", $assigned_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-            while ($row = $result->fetch_assoc()) {
-                $attendance_records[] = $row;
-            }
-            $stmt->close();
+        while ($row = $result->fetch_assoc()) {
+            $attendance_records[] = $row;
         }
+        $stmt->close();
+    }
 
-        // Handle payslip save
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_payslip'])) {
-            $basic = floatval($_POST['basic']);
-            $incentives = floatval($_POST['incentives']);
-            $overtime = floatval($_POST['overtime']);
-            $sss = floatval($_POST['sss']);
-            $pagibig = floatval($_POST['pagibig']);
-            $philhealth = floatval($_POST['philhealth']);
-            $total = $basic + $incentives + $overtime;
-            $grand_total = $total - ($sss + $pagibig + $philhealth);
+    // Handle payslip save
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_payslip'])) {
+        $basic = floatval($_POST['basic']);
+        $incentives = floatval($_POST['incentives']);
+        $overtime = floatval($_POST['overtime']);
+        $sss = floatval($_POST['sss']);
+        $pagibig = floatval($_POST['pagibig']);
+        $philhealth = floatval($_POST['philhealth']);
+        $total = $basic + $incentives + $overtime;
+        $grand_total = $total - ($sss + $pagibig + $philhealth);
 
-            $insert_sql = "INSERT INTO salary_table (staff_id, basic, incentives, overtime, sss, pagibig, philhealth, total, grand_total) 
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            $insert_stmt = $conn->prepare($insert_sql);
-            if ($insert_stmt) {
-                $insert_stmt->bind_param("idddddddd", $staff_id, $basic, $incentives, $overtime, $sss, $pagibig, $philhealth, $total, $grand_total);
-                $insert_stmt->execute();
-                $insert_stmt->close();
-            }
+        $insert_sql = "INSERT INTO salary_table (staff_id, basic, incentives, overtime, sss, pagibig, philhealth, total, grand_total) 
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $insert_stmt = $conn->prepare($insert_sql);
+        if ($insert_stmt) {
+            $insert_stmt->bind_param("idddddddd", $staff_id, $basic, $incentives, $overtime, $sss, $pagibig, $philhealth, $total, $grand_total);
+            $insert_stmt->execute();
+            $insert_stmt->close();
         }
-    } 
+    }
+} 
 
-    
-    $conn->close(); 
- ?>
-
+$conn->close(); 
+?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -117,57 +114,55 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
                 <div class="section" id="personal-info" style="display: block">
                     <div class="personal-info-window">
                         <div class="profile-card">
-                            <img src="../images/default-profile.png" alt="" />
-                            <p class="employee-name"><?php echo $staff['firstname'] . ' ' . $staff['lastname']; ?></p>
-                            <p class="employee-role"><?php echo $staff['status']; ?></p>
+                            <img src="<?= !empty($staff['profile_picture']) ? htmlspecialchars($staff['profile_picture']) : '../images/default-profile.png'; ?>" alt="Profile Picture" />
+                            <p class="employee-name"><?php echo htmlspecialchars($staff['firstname'] . ' ' . $staff['lastname']); ?></p>
+                            <p class="employee-role"><?php echo htmlspecialchars($staff['status']); ?></p>
                             <div class="profile-info">
-                                <p>Status: <span><?php echo $staff['status']; ?></span></p>
-                                <p>Email: <span><?php echo $staff['email']; ?></span></p>
-                                <p>Contact Number: <span><?php echo $staff['cnum']; ?></span></p>
+                                <p>Status: <span><?php echo htmlspecialchars($staff['status']); ?></span></p>
+                                <p>Email: <span><?php echo htmlspecialchars($staff['email']); ?></span></p>
+                                <p>Contact Number: <span><?php echo htmlspecialchars($staff['cnum']); ?></span></p>
                             </div>
                         </div>
 
-        <div class="basic-information">                   
-                 <h1>Basic Information
-                     <?php if ($assigned_id): ?> <a href="edit-employees.php?employee_id=<?= htmlspecialchars($assigned_id); ?>" class="edit-link" style="font-size: 13px; margin-left: 300px;">Edit Profile</a>
-                     <?php endif; ?>
-                </h1>
+                        <div class="basic-information">                   
+                            <h1>Basic Information
+                                <?php if ($assigned_id): ?> <a href="edit-employees.php?employee_id=<?= htmlspecialchars($assigned_id); ?>" class="edit-link" style="font-size: 13px; margin-left: 300px;">Edit Profile</a>
+                                <?php endif; ?>
+                            </h1>
                             <br />
-                                <div class="basic-info-field">
-                                    <div>
-                                        <p>First Name:</p>
-                                        <p>Last Name:</p>
-                                        <p>Sex:</p>
-                                        <p>Age:</p>
-                                        <p>Shift:</p>
-                                    </div>
-                                    <div>
-                                        <p><?php echo htmlspecialchars($staff['firstname']); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['lastname']); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['sex']); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['age']); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['shift_start']) .' - '. htmlspecialchars($staff['shift_end']); ?></p>
-                                    </div>
+                            <div class="basic-info-field">
+                                <div>
+                                    <p>First Name:</p>
+                                    <p>Last Name:</p>
+                                    <p>Sex:</p>
+                                    <p>Age:</p>
+                                    <p>Shift:</p>
                                 </div>
+                                <div>
+                                    <p><?php echo htmlspecialchars($staff['firstname']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['lastname']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['sex']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['age']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['shift_start']) .' - '. htmlspecialchars($staff['shift_end']); ?></p>
+                                </div>
+                            </div>
 
-                                <h1>Personal Information</h1>
-                                <br />
-                                <div class="personal-information-field">
-                                    <div>
-                                        <p>Date of birth</p>
-                                        <p>Height</p>
-                                        <p>Weight</p>
-                                        <p>Civil Status</p>
-                                        <p>Nationality</p>
-                                        <p>Address</p>
-                                        <p>Languages Known</p>
-                                        <p>Educational Attainment</p>
-                                        <p>Religion</p>
-                                        <p>Contact Number</p>
-
-
-                                    </div>
-                                    <div>
+                            <h1>Personal Information</h1>
+                            <br />
+                            <div class="personal-information-field">
+                                <div>
+                                    <p>Date of birth:</p>
+                                    <p>Height:</p>
+                                    <p>Weight:</p>
+                                    <p>Civil Status:</p>
+                                    <p>Nationality:</p>
+                                    <p>Address:</p>
+                                    <p>Languages Known:</p>
+                                    <p>Educational Attainment:</p>
+                                    <p>Religion:</p>
+                                    <p>Contact Number:</p>
+                                </div>
+                                <div>
                                         <p><?php echo htmlspecialchars($staff['bdate']); ?></p>
                                         <p><?php echo htmlspecialchars($staff['height']); ?></p>
                                         <p><?php echo htmlspecialchars($staff['weight']); ?></p>

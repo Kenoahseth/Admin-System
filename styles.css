@@ -1037,14 +1037,14 @@ table.attendance-table tfoot .links a {
   align-items: center;
 }
 
-.add-employee-picture button {
+.add-employee-picture label {
   cursor: pointer;
   margin: 1rem;
   border: none;
   background: none;
 }
 
-.add-employee-picture button p {
+.add-employee-picture label p {
   background-color: #198754;
   color: #fff;
   font-weight: 700;
@@ -1053,7 +1053,7 @@ table.attendance-table tfoot .links a {
   transition: 0.3s ease-in-out;
 }
 
-.add-employee-picture button:hover > p {
+.add-employee-picture label:hover > p {
   background-color: #136740;
   border-radius: 20px;
 }

@@ -17,10 +17,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $educational_attainment = $_POST['educational_attainment'];
     $cnum = $_POST['cnum'];
     $assigned_id = $_POST['assigned_id'];
+    $position = $_POST['position'];
+    $height = $_POST['height'];
+    $weight = $_POST['weight'];
+    $status = 'Inactive';
     $user_recorded = 'admin';
+    
+    // Handle file upload
+    $filePath = null;
+    if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] == 0) {
+        $profilePicture = $_FILES['profile_picture'];
+        $uploadDir = 'uploads/profile_pictures/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        $filePath = $uploadDir . basename($profilePicture['name']);
+        move_uploaded_file($profilePicture['tmp_name'], $filePath);
+    }
 
-    $sql = "INSERT INTO staffs_table (firstname, lastname, sex, age, shift_start, shift_end, bdate, civ_stat, nationality, address, religion, educational_attainment, cnum, assigned_id)
-            VALUES ('$firstname', '$lastname', '$sex', '$age', '$shift_start', '$shift_end', '$bdate', '$civ_stat', '$nationality', '$address', '$religion', '$educational_attainment', '$cnum', '$assigned_id')";
+    $sql = "INSERT INTO staffs_table (firstname, lastname, sex, age, shift_start, shift_end, bdate, civ_stat, nationality, address, religion, educational_attainment, cnum, assigned_id, position, height, weight, status, profile_picture)
+            VALUES ('$firstname', '$lastname', '$sex', '$age', '$shift_start', '$shift_end', '$bdate', '$civ_stat', '$nationality', '$address', '$religion', '$educational_attainment', '$cnum', '$assigned_id', '$position', '$height', '$weight', '$status', '$filePath')";
 
     if ($conn->query($sql) === TRUE) {
         $activity_name = "Add Employee"; 
@@ -65,12 +81,13 @@ $conn->close();
 
         <section class="add-employees-section">
             <div class="add-employees-container">
-                <form action="add-employees.php" method="POST">
+                <form action="add-employees.php" method="POST" enctype="multipart/form-data">
                     <div class="add-employee-picture">
-                        <button type="button">
-                            <img src="../images/profile.png" alt="" />
+                        <input type="file" name="profile_picture" accept="image/*" id="profile_picture" style="display: none;">
+                        <label for="profile_picture">
+                            <img src="../images/profile.png" alt="Profile Picture" id="profile_picture_preview" style="cursor: pointer;">
                             <p>Add Picture</p>
-                        </button>
+                        </label>
                     </div>
                     <div class="employee-details">
                         <div class="grid-div">
@@ -149,11 +166,40 @@ $conn->close();
                             <label for="assigned_id">Employee ID</label>
                             <input type="number" name="assigned_id" placeholder="Enter their assigned ID" required />
                         </div>
+                        <div class="grid-div">
+                            <label for="position">Position</label>
+                            <input type="text" name="position" placeholder="Enter their position" required />
+                        </div>
+                        <div class="grid-div">
+                            <label for="height">Height (in cm)</label>
+                            <input type="number" step="0.01" name="height" placeholder="Enter their height in cm" required />
+                        </div>
+                        <div class="grid-div">
+                            <label for="weight">Weight (in kg)</label>
+                            <input type="number" step="0.01" name="weight" placeholder="Enter their weight in kg" required />
+                        </div>
                         <button type="submit" class="submit-btn">Submit</button>
                     </div>
                 </form>
             </div>
         </section>
+
+        <script>
+            document.getElementById('profile_picture').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profile_picture_preview').src = e.target.result;
+                };
+                
+                reader.readAsDataURL(file);
+            });
+
+            document.querySelector('.add-employee-picture label').addEventListener('click', function() {
+                document.getElementById('profile_picture').click();
+            });
+        </script>
     </main>
 </body>
 </html>
+
