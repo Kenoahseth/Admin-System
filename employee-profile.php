@@ -18,15 +18,19 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     $assigned_id = $staff['assigned_id'];
 
     // Fetch salary details
-    $salary_sql = "SELECT * FROM salary_table WHERE staff_id = ?";
-    $salary_stmt = $conn->prepare($salary_sql);
+    $staff_id = intval($_GET['id']); 
+    $salary_sql = "SELECT * FROM salary_table WHERE staff_id = ? ORDER BY pay_id DESC LIMIT 1"; 
+    $salary_stmt = $conn->prepare($salary_sql); 
     $salary_stmt->bind_param("i", $staff_id);
-    $salary_stmt->execute();
-    $salary_result = $salary_stmt->get_result();
-    $salary = $salary_result->num_rows > 0 ? $salary_result->fetch_assoc() : null;
+     $salary_stmt->execute(); 
+    $salary_result = $salary_stmt->get_result(); $salary = $salary_result->num_rows > 0 ? $salary_result->fetch_assoc() : null;
+    
     $salary_stmt->close();
 
+
+
     // Fetch attendance records
+
     $attendance_records = [];
     $sql = "SELECT at.date, st.status, at.time_in, at.time_out, at.recorded_status,
                 SEC_TO_TIME(TIMESTAMPDIFF(SECOND, at.time_in, at.time_out)) AS overtime,
@@ -68,6 +72,28 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         }
     }
 } 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if (isset($data['event_id'])) {
+        $event_id = intval($data['event_id']);
+        
+        $sql = "DELETE FROM events_table WHERE event_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $event_id);
+
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false]);
+        }
+
+        $stmt->close();
+    } else {
+        echo json_encode(['success' => false]);
+    }
+}
+
 
 $conn->close(); 
 ?>
@@ -226,7 +252,7 @@ $conn->close();
                 <div class="section" id="payslip" style="display: none">
                     <div class="payslip-window">
                         <div class="profile-card">
-                            <img src="../images/default-profile.png" alt="" />
+                        <img src="<?= !empty($staff['profile_picture']) ? htmlspecialchars($staff['profile_picture']) : '../images/default-profile.png'; ?>" alt="Profile Picture" />
                             <p class="employee-name"><?php echo htmlspecialchars($staff['firstname'] . ' ' . $staff['lastname']); ?></p>
                             <p class="employee-role"><?php echo htmlspecialchars($staff['status']); ?></p>
                             <div class="profile-info">
@@ -344,6 +370,33 @@ $conn->close();
                 }
             });
         }
+    </script>
+
+    <script>
+        document.getElementById('deleteEventButton').addEventListener('click', function() {
+    const eventId = getCurrentEventId(); // Assume this function retrieves the current event ID
+
+    if (confirm('Are you sure you want to delete this event?')) {
+        fetch('delete_event.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ event_id: eventId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Event deleted successfully');
+                location.reload(); // Refresh the page to reflect changes
+            } else {
+                alert('Failed to delete event');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+});
+
     </script>
 </body>
 </html>

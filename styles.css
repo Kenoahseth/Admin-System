@@ -159,8 +159,11 @@ body {
   padding: 0 2rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
+  justify-content: space-between;}
+  .breadcrumbs .left {
+    width: 100%;
+  }
+  
 
 .breadcrumbs .left span {
   color: #198754;
@@ -172,6 +175,11 @@ body {
   display: flex;
   gap: 2rem;
   font-size: 20px;
+  flex: 1 0 auto;
+}
+.right #currentTime {
+  width: 100%;
+  margin-left: 1rem;
 }
 
 .breadcrumbs .right a {
@@ -1180,6 +1188,8 @@ table.attendance-table tfoot .links a {
   font-weight: 700;
   transition: 0.3s ease-in-out; 
   margin-top: 5px;  
+  display: inline-block;
+  width: fit-content;
   }
 
   .add-event-btn:hover {
@@ -1207,8 +1217,7 @@ table.attendance-table tfoot .links a {
   margin: 15% auto; 
   padding: 20px;
   border: 1px solid #888;
-  width:
- 50%; 
+  width: fit-content;
   border-radius: 5px; 
   animation: fadeIn 0.5s ease; 
 }
@@ -1267,12 +1276,14 @@ table.attendance-table tfoot .links a {
 }
 
 
-.emp-id{
+.emp-id {
   display: flex;
   margin-left: 55%;
   padding: 12px;
-  border-radius: 28px;
+  border-radius: 10px;
+  overflow: hidden;
   background-color: rgb(255, 251, 251);
+  width: 100%;
 }
 
 .portal-btn{
@@ -1295,4 +1306,52 @@ table.attendance-table tfoot .links a {
     color: #ccc; 
     cursor: not-allowed; 
     opacity: 0.6; 
+}
+
+.delete-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background-color: #f44336; /* Red background */
+  color: white; /* White text */
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background-color: #d32f2f; /* Darker red on hover */
+}
+.modal-event-field {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.modal-header {
+  margin-bottom: 1rem;
+}
+
+.modal-event-field #modalEventName {
+  color: #04aa6d;
+}
+
+.modal-event-span {
+  color: #333;
+}
+
+#addEventModal .modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#addEventModal .modal-content form #event_name,
+#event_date,
+#event_description,
+#event_organizer {
+  padding: 5px 10px;
+  font-size: 14px;
 }

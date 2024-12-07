@@ -333,7 +333,7 @@ $conn->close();
                 <div class="section" id="payslip" style="display: none">
     <div class="payslip-window">
         <div class="profile-card">
-            <img src="../images/default-profile.png" alt="" />
+        <img src="<?= htmlspecialchars($staff['profile_picture'] ?? '../images/default-profile.png'); ?>" alt="Profile Picture" />
             <p class="employee-name">
                 <?php echo htmlspecialchars((isset($staff['firstname']) ? $staff['firstname'] : '') . ' ' . (isset($staff['lastname']) ? $staff['lastname'] : '')); ?>
             </p>

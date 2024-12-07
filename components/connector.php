@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "hoteldb";
+$dbname = "hoteldb"; /* pos_system_php */
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
