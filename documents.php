@@ -33,8 +33,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['document_file'])) {
     }
 }
 
-// Fetch documents
-$query = "SELECT docu_id, docu_name, docu_type, docu_path FROM documents_table ORDER BY docu_name ASC";
+// Fetch documents with sorting
+$sort_option = isset($_GET['sort']) ? $_GET['sort'] : 'date';
+$order_by = 'ORDER BY upload_date DESC'; // Default sorting by date
+
+if ($sort_option == 'date') {
+    $order_by = 'ORDER BY created_at DESC';
+} elseif ($sort_option == 'name') {
+    $order_by = 'ORDER BY docu_name ASC';
+}
+
+$query = "SELECT docu_id, docu_name, docu_type, docu_path, created_at FROM documents_table $order_by";
 $result = $conn->query($query);
 $documents = [];
 
@@ -43,7 +52,10 @@ if ($result->num_rows > 0) {
         $documents[] = $row;
     }
 }
+
+$conn->close();
 ?>
+
 
 
 
@@ -77,11 +89,14 @@ if ($result->num_rows > 0) {
                 <div class="documents-menu">
                     <button class="add-btn" id="addDocumentButton">Add Document</button>
 
-                    <select id="sortSelect" class="sort-select">
-                        <option value="" selected disabled>Sort Options</option>
-                        <option value="date">Date Added</option>
-                        <option value="name">Alphabetical</option>
-                    </select>
+                    <form method="GET" action="documents.php" class="sort-form">
+                        <select name="sort" id="sortSelect" class="sort-select" onchange="this.form.submit()">
+                            <option value="" selected disabled>Sort Options</option>
+                            <option value="date" <?= $sort_option == 'date' ? 'selected' : '' ?>>Date Added</option>
+                            <option value="name" <?= $sort_option == 'name' ? 'selected' : '' ?>>Alphabetical</option>
+                        </select>
+                    </form>
+
 
                     <div class="search-bar">
                         <input type="text" id="searchBar" placeholder="Search something..." />

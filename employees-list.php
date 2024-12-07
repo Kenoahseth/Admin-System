@@ -16,9 +16,20 @@
     include "components/sidebar.php"; 
     include "components/connector.php"; 
 
-    $sql = "SELECT staff_id, firstname, lastname, status, shift_start, shift_end, profile_picture, position FROM staffs_table";
+    $sort_option = isset($_GET['sort']) ? $_GET['sort'] : '';
+
+    // Modify the SQL query based on the sorting option
+    $order_by = 'ORDER BY staff_id DESC'; // Default sorting (newest first)
+    if ($sort_option == 'oldest') {
+        $order_by = 'ORDER BY staff_id ASC';
+    } elseif ($sort_option == 'alphabetical') {
+        $order_by = 'ORDER BY firstname ASC';
+    }
+
+    $sql = "SELECT staff_id, firstname, lastname, position, status, shift_start, shift_end, profile_picture FROM staffs_table $order_by";
     $result = $conn->query($sql);
-    ?>
+?>
+  
 
    <main style="margin-left: 85px">
         <div class="breadcrumbs">
@@ -37,16 +48,19 @@
         </div>
 
         <section class="employees-list-section">
-            <div class="top-buttons">
-                <a href="add-employees.php" class="add-btn">Add</a>
-                <a href="edit-employees.php" class="edit-btn">Edit</a>
-                <select name="sort" id="" class="sort-select">
-                    <option value="" selected disabled>Sort</option>
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                    <option value="alphabetical">Alphabetical</option>
+        <div class="top-buttons">
+            <a href="add-employees.php" class="add-btn">Add</a>
+            <a href="edit-employees.php" class="edit-btn">Edit</a>
+            <form method="GET" action="employees-list.php" class="sort-form">
+                <select name="sort" id="sort-select" class="sort-select" onchange="this.form.submit()">
+                    <option value="" disabled selected>Sort</option>
+                    <option value="newest" <?= $sort_option == 'newest' ? 'selected' : '' ?>>Newest First</option>
+                    <option value="oldest" <?= $sort_option == 'oldest' ? 'selected' : '' ?>>Oldest First</option>
+                    <option value="alphabetical" <?= $sort_option == 'alphabetical' ? 'selected' : '' ?>>Alphabetical</option>
                 </select>
-            </div>
+            </form>
+        </div>
+
 
             <div class="employees-grid">
                 <?php
