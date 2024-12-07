@@ -163,19 +163,19 @@ $conn->close();
                                     <p>Contact Number:</p>
                                 </div>
                                 <div>
-                                        <p><?php echo htmlspecialchars($staff['bdate']); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['height']); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['weight']); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['civ_stat']); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['nationality']); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['address']); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['languages']); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['educational_attainment']); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['religion']); ?></p>
-                                        <p><?php echo htmlspecialchars($staff['cnum']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['bdate']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['height']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['weight']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['civ_stat']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['nationality']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['address']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['languages']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['educational_attainment']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['religion']); ?></p>
+                                    <p><?php echo htmlspecialchars($staff['cnum']); ?></p>
                                 </div>
                             </div>
-                        </d>
+                        </div>
                     </div>
                 </div>
 
@@ -185,7 +185,7 @@ $conn->close();
                             <div class="attendance-header">
                                 <h1>Daily Time Records</h1>
                                 <div class="search-bar">
-                                    <input type="text" name="search-bar" id="search-bar" placeholder="Search something..." />
+                                                                        <input type="text" name="search-bar" id="search-bar" placeholder="Search something..." />
                                     <span><i class="fa fa-search" aria-hidden="true"></i></span>
                                 </div>
                             </div>
@@ -222,14 +222,12 @@ $conn->close();
                         </div>
                     </div>
                 </div>
-                                     
 
-                
                 <div class="section" id="payslip" style="display: none">
                     <div class="payslip-window">
                         <div class="profile-card">
                             <img src="../images/default-profile.png" alt="" />
-            <p class="employee-name"><?php echo htmlspecialchars($staff['firstname'] . ' ' . $staff['lastname']); ?></p>
+                            <p class="employee-name"><?php echo htmlspecialchars($staff['firstname'] . ' ' . $staff['lastname']); ?></p>
                             <p class="employee-role"><?php echo htmlspecialchars($staff['status']); ?></p>
                             <div class="profile-info">
                                 <p>Status: <span><?php echo htmlspecialchars($staff['status']); ?></span></p>
@@ -313,6 +311,40 @@ $conn->close();
         document.getElementById('payButton').addEventListener('click', function() {
             showModal('Payment successful!');
         });
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+        }
+
+        function showModal(message) {
+            const modal = document.getElementById('modal');
+            const modalText = document.getElementById('modalText');
+            const successButton = document.getElementById('successButton');
+            const confirmationButtons = document.getElementById('confirmationButtons');
+
+            modalText.textContent = message;
+            successButton.style.display = 'block';
+            confirmationButtons.style.display = 'none';
+            modal.style.display = 'block';
+
+            document.getElementById('okButton').addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+
+            document.getElementById('closeModal').addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
     </script>
 </body>
 </html>
+
